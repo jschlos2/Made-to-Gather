@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "made-to-gather",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "HOST_AUTH_DISABLED": "true",
+    "TEAM_DOMAIN": "https://REPLACE_WITH_YOUR_TEAM_NAME.cloudflareaccess.com",
+    "POLICY_AUD": "REPLACE_WITH_YOUR_ACCESS_APPLICATION_AUD"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "made-to-gather-rsvps",
+      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID",
+      "preview_database_id": "DB",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "made-to-gather-photos"
+    }
+  ]
+}

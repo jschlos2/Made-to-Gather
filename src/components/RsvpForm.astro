@@ -2,23 +2,42 @@
 import type { InvitationEvent } from '../data/events';
 interface Props { event: InvitationEvent }
 const { event } = Astro.props;
+const calendarParameters = new URLSearchParams({
+  action: 'TEMPLATE',
+  text: event.title,
+  dates: `${event.calendar.start}/${event.calendar.end}`,
+  ctz: event.calendar.timeZone,
+  details: event.description.join(' '),
+  location: `${event.location.name}, ${event.location.address}`,
+});
+const calendarUrl = `https://calendar.google.com/calendar/render?${calendarParameters.toString()}`;
 ---
 
 <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
   <div class="rsvp__intro">
     <h2 id="rsvp-title">Will you be there?</h2>
-    <p>Please reply by {event.rsvpDeadline}. This preview won’t save or send your response.</p>
+    <p>Please reply by {event.rsvpDeadline}. Your response will be saved when you submit it.</p>
   </div>
 
-  <form class="rsvp__form" data-rsvp-form>
-    <div class="field field--full">
+  <form class="rsvp__form" data-rsvp-form data-event-slug={event.slug}>
+    <div class="field field--full field--name">
       <label for="guest-name">Your name</label>
-      <input id="guest-name" name="guestName" type="text" autocomplete="name" required />
+      <input id="guest-name" name="guestName" type="text" autocomplete="name" maxlength="120" required />
     </div>
 
-    <div class="field field--full">
-      <label for="mobile-number">Mobile number <span>(optional)</span></label>
-      <input id="mobile-number" name="mobileNumber" type="tel" autocomplete="tel" inputmode="tel" />
+    <div class="field field--full field--mobile">
+      <label for="mobile-number">Mobile number</label>
+      <input
+        id="mobile-number"
+        name="mobileNumber"
+        type="tel"
+        autocomplete="tel"
+        inputmode="tel"
+        maxlength="24"
+        aria-describedby="mobile-number-help"
+        required
+      />
+      <p class="field-help" id="mobile-number-help">We’ll use this number to confirm your RSVP and share important updates about this event.</p>
     </div>
 
     <fieldset class="field field--full choice-group">
@@ -27,43 +46,60 @@ const { event } = Astro.props;
       <label><input type="radio" name="attendance" value="declines" required /> <span>No</span></label>
     </fieldset>
 
-    <div class="field count-field">
+    <div class="field count-field count-field--adults">
       <label for="adults">Adults attending</label>
-      <input id="adults" name="adults" type="number" inputmode="numeric" min="0" max="12" value="1" required />
+      <div class="count-control">
+        <button type="button" data-count-change="-1" aria-label="Decrease adults">−</button>
+        <input id="adults" name="adults" type="number" inputmode="numeric" min="0" max="12" value="1" required />
+        <button type="button" data-count-change="1" aria-label="Increase adults">+</button>
+      </div>
     </div>
-    <div class="field count-field">
+    <div class="field count-field count-field--children">
       <label for="children">Children attending</label>
-      <input id="children" name="children" type="number" inputmode="numeric" min="0" max="12" value="0" required />
+      <div class="count-control">
+        <button type="button" data-count-change="-1" aria-label="Decrease children">−</button>
+        <input id="children" name="children" type="number" inputmode="numeric" min="0" max="12" value="0" required />
+        <button type="button" data-count-change="1" aria-label="Increase children">+</button>
+      </div>
     </div>
 
-    <div class="field field--full">
+    <div class="field field--full field--dietary">
       <label for="dietary">Dietary restrictions <span>(optional)</span></label>
-      <input id="dietary" name="dietary" type="text" />
+      <input id="dietary" name="dietary" type="text" maxlength="500" />
     </div>
 
-    <div class="field field--full">
+    <div class="field field--full field--message">
       <label for="message">Notes <span>(optional)</span></label>
-      <textarea id="message" name="message" rows="3"></textarea>
+      <textarea id="message" name="message" rows="3" maxlength="1000"></textarea>
     </div>
 
-    <button class="ticket-button field--full" type="submit"><span>Send RSVP</span></button>
-    <p class="form-note field--full">Demo only—nothing is stored or sent.</p>
+    <button class="ticket-button field--full" type="submit" data-submit-button><span data-submit-label>Send RSVP</span></button>
+    <p class="form-note field--full" data-form-status aria-live="polite" tabindex="-1"></p>
   </form>
 
   <div class="rsvp__confirmation" data-confirmation hidden tabindex="-1">
     <div class="confirmation__copy">
-      <h3>Thank you!</h3>
-      <p class="confirmation__status" data-confirmation-status>Your RSVP has been received</p>
-      <p data-confirmation-copy>We can’t wait to celebrate with you! You’ll receive a confirmation message with the party details.</p>
+      <h3>Thanks! Your RSVP has been received.</h3>
+      <dl class="confirmation__details">
+        <div><dt>Response</dt><dd data-confirmation-status>Attending</dd></div>
+        <div><dt>Guests</dt><dd data-confirmation-party>1 adult, 0 children</dd></div>
+        <div><dt>Date and time</dt><dd>{event.date.weekday}, {event.date.monthDay}, {event.date.year} · {event.time}</dd></div>
+        <div><dt>Location</dt><dd>{event.location.name}<br />{event.location.address}</dd></div>
+      </dl>
+      <div class="confirmation__actions">
+        <a href={calendarUrl} target="_blank" rel="noopener noreferrer">Add to Calendar<span class="visually-hidden"> (opens in a new tab)</span></a>
+        <a href="#invitation-top">Return to Invitation</a>
+      </div>
     </div>
     <div class="confirmation__garden" data-confirmation-garden>
       <p data-signoff>See you there!</p>
       <div class="flowers" aria-hidden="true">
-        <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <img class="flowers__art" src="/artwork/flowers.png" alt="" width="1728" height="1728" decoding="async" />
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
       </div>
     </div>
-    <p class="confirmation__aside">This is a visual preview. Your response has not been saved or sent.</p>
-    <button class="text-button" type="button" data-edit-response>Return to the form</button>
+    <p class="confirmation__aside">Another guest may use this device to send a separate response.</p>
+    <button class="text-button" type="button" data-edit-response>Submit another RSVP</button>
   </div>
 </section>
 
@@ -71,31 +107,111 @@ const { event } = Astro.props;
   const form = document.querySelector<HTMLFormElement>('[data-rsvp-form]');
   const confirmation = document.querySelector<HTMLElement>('[data-confirmation]');
   const confirmationStatus = document.querySelector<HTMLElement>('[data-confirmation-status]');
-  const confirmationCopy = document.querySelector<HTMLElement>('[data-confirmation-copy]');
+  const confirmationParty = document.querySelector<HTMLElement>('[data-confirmation-party]');
   const signoff = document.querySelector<HTMLElement>('[data-signoff]');
   const garden = document.querySelector<HTMLElement>('[data-confirmation-garden]');
   const editButton = document.querySelector<HTMLButtonElement>('[data-edit-response]');
+  const submitButton = document.querySelector<HTMLButtonElement>('[data-submit-button]');
+  const submitLabel = document.querySelector<HTMLElement>('[data-submit-label]');
+  const formStatus = document.querySelector<HTMLElement>('[data-form-status]');
+  let isSubmitting = false;
 
-  form?.addEventListener('submit', (event) => {
+  form?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!form.reportValidity() || !confirmation) return;
+    if (isSubmitting || !form.reportValidity() || !confirmation || !submitButton) return;
     const data = new FormData(form);
     const isAttending = data.get('attendance') === 'attending';
-    if (confirmationStatus) confirmationStatus.textContent = isAttending ? 'Your RSVP has been received' : 'Your response has been received';
-    if (confirmationCopy) confirmationCopy.textContent = isAttending
-      ? 'We can’t wait to celebrate with you! You’ll receive a confirmation message with the party details.'
-      : 'We’ll miss celebrating with you but look forward to seeing you soon!';
-    if (signoff) signoff.textContent = isAttending ? 'See you there!' : 'See you next time!';
-    garden?.classList.toggle('confirmation__garden--declined', !isAttending);
-    form.hidden = true;
-    confirmation.hidden = false;
-    confirmation.focus();
+    const adults = Number(data.get('adults'));
+    const children = Number(data.get('children'));
+    const submissionId = form.dataset.submissionId || crypto.randomUUID();
+    form.dataset.submissionId = submissionId;
+    const payload = {
+      submissionId,
+      eventSlug: form.dataset.eventSlug,
+      guestName: data.get('guestName'),
+      mobileNumber: data.get('mobileNumber'),
+      attendance: data.get('attendance'),
+      adults,
+      children,
+      dietaryRestrictions: data.get('dietary'),
+      message: data.get('message'),
+    };
+
+    isSubmitting = true;
+    submitButton.disabled = true;
+    form.setAttribute('aria-busy', 'true');
+    if (submitLabel) submitLabel.textContent = 'Saving…';
+    if (formStatus) {
+      formStatus.textContent = 'Saving your RSVP…';
+      formStatus.classList.remove('form-note--error');
+    }
+
+    try {
+      const response = await fetch('/api/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.ok) {
+        const mobileInput = form.querySelector<HTMLInputElement>('[name="mobileNumber"]');
+        if (mobileInput && result?.errors?.mobileNumber) {
+          mobileInput.setCustomValidity(result.errors.mobileNumber);
+          mobileInput.reportValidity();
+        }
+        throw new Error(result?.errors?.mobileNumber || result?.message || 'We could not save your RSVP. Please try again.');
+      }
+
+      if (confirmationStatus) confirmationStatus.textContent = isAttending ? 'Attending' : 'Unable to attend';
+      if (confirmationParty) confirmationParty.textContent = isAttending
+        ? `${adults} adult${adults === 1 ? '' : 's'}, ${children} ${children === 1 ? 'child' : 'children'}`
+        : '0 adults, 0 children';
+      if (signoff) signoff.textContent = isAttending ? 'See you there!' : 'See you next time!';
+      garden?.classList.toggle('confirmation__garden--declined', !isAttending);
+      form.hidden = true;
+      confirmation.hidden = false;
+      confirmation.focus();
+    } catch (error) {
+      const responseError = error instanceof Error ? error : null;
+      if (formStatus) {
+        formStatus.textContent = responseError?.message || 'We could not save your RSVP. Please try again.';
+        formStatus.classList.add('form-note--error');
+        formStatus.focus();
+      }
+    } finally {
+      isSubmitting = false;
+      submitButton.disabled = false;
+      form.removeAttribute('aria-busy');
+      if (submitLabel) submitLabel.textContent = 'Send RSVP';
+    }
+  });
+
+  form?.querySelector<HTMLInputElement>('[name="mobileNumber"]')?.addEventListener('input', (event) => {
+    (event.currentTarget as HTMLInputElement).setCustomValidity('');
+  });
+
+  form?.querySelectorAll<HTMLButtonElement>('[data-count-change]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const input = button.parentElement?.querySelector<HTMLInputElement>('input[type="number"]');
+      if (!input) return;
+      const change = Number(button.dataset.countChange);
+      const minimum = Number(input.min || 0);
+      const maximum = Number(input.max || 12);
+      input.value = String(Math.min(maximum, Math.max(minimum, Number(input.value || 0) + change)));
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
   });
 
   editButton?.addEventListener('click', () => {
     if (!form || !confirmation) return;
     confirmation.hidden = true;
     form.hidden = false;
+    form.reset();
+    delete form.dataset.submissionId;
+    if (formStatus) {
+      formStatus.textContent = '';
+      formStatus.classList.remove('form-note--error');
+    }
     form.querySelector<HTMLInputElement>('input')?.focus();
   });
 </script>

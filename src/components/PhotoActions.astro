@@ -1,0 +1,25 @@
+---
+import type { InvitationEvent } from '../data/events';
+const { event } = Astro.props as { event: InvitationEvent };
+---
+{(event.photos.uploadsEnabled || event.photos.galleryEnabled) && (
+  <nav class="photo-actions" aria-label="Event photos" data-photo-actions data-event={event.slug}>
+    {event.photos.uploadsEnabled && <a href={`/events/${event.slug}/photos/upload`}>Add your photos</a>}
+    {event.photos.galleryEnabled && <a href={`/events/${event.slug}/photos`} data-gallery-link hidden>View event photos</a>}
+  </nav>
+)}
+<script>
+  for (const nav of document.querySelectorAll<HTMLElement>('[data-photo-actions]')) {
+    const link = nav.querySelector<HTMLAnchorElement>('[data-gallery-link]');
+    if (!link) continue;
+    fetch(`/api/photos/gallery/${nav.dataset.event}`, { headers: { Accept: 'application/json' } })
+      .then((response) => response.ok ? response.json() : null)
+      .then((result) => { if (result?.photos?.length) link.hidden = false; })
+      .catch(() => {});
+  }
+</script>
+<style>
+  .photo-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:.75rem; padding:2rem 1.25rem; border-top:var(--border); }
+  .photo-actions a { display:inline-flex; min-height:44px; align-items:center; padding:.65rem 1rem; border:1px solid currentColor; color:var(--color-ink); font-family:var(--font-label); font-weight:700; letter-spacing:.04em; text-decoration:none; text-transform:uppercase; }
+  .photo-actions a:hover { background:var(--color-ink); color:var(--color-white); }
+</style>

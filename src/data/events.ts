@@ -44,6 +44,11 @@ export interface InvitationEvent {
     year: string;
   };
   time: string;
+  calendar: {
+    start: string;
+    end: string;
+    timeZone: string;
+  };
   location: {
     name: string;
     address: string;
@@ -53,6 +58,11 @@ export interface InvitationEvent {
   details: EventDetail[];
   rsvpDeadline: string;
   hosts: string;
+  photos: {
+    uploadsEnabled: boolean;
+    galleryEnabled: boolean;
+    uploadTokenEnv: string;
+  };
   theme: EventTheme;
   demonstration?: boolean;
 }
@@ -61,8 +71,8 @@ const graduationTheme: EventTheme = {
   name: 'theme-graduation',
   decorativeClasses: ['paper-grain', 'retro-postcard'],
   colors: {
-    paper: '#f3eddd', paperDeep: '#dfd1b5', ink: '#16475a', inkSoft: '#315b68',
-    accent: '#d96750', action: '#eb6b3d', panel: '#5e824b', panelDeep: '#456c3e',
+    paper: '#f4e9d2', paperDeep: '#dfd1b5', ink: '#274c5a', inkSoft: '#264d59',
+    accent: '#c5644e', action: '#df6841', panel: '#5e7948', panelDeep: '#456c3e',
     light: '#fffaf0', surround: '#d9c8aa',
   },
   fonts: {
@@ -101,6 +111,7 @@ export const events: InvitationEvent[] = [
     },
     date: { weekday: 'Saturday', monthDay: 'August 29', year: '2026' },
     time: '2–6 PM',
+    calendar: { start: '20260829T140000', end: '20260829T180000', timeZone: 'America/Los_Angeles' },
     location: {
       name: 'The Robertson Home',
       address: '10485 NW Green View Ln',
@@ -115,6 +126,11 @@ export const events: InvitationEvent[] = [
     ],
     rsvpDeadline: 'August 20',
     hosts: 'The Robertson Family',
+    photos: {
+      uploadsEnabled: true,
+      galleryEnabled: true,
+      uploadTokenEnv: 'PHOTO_UPLOAD_TOKEN_GRADUATION',
+    },
     theme: graduationTheme,
   },
   {
@@ -130,6 +146,7 @@ export const events: InvitationEvent[] = [
     },
     date: { weekday: 'Sunday', monthDay: 'October 11', year: '2026' },
     time: '1–4 PM',
+    calendar: { start: '20261011T130000', end: '20261011T160000', timeZone: 'America/Los_Angeles' },
     location: {
       name: 'Laurel Grove Park',
       address: '18 Garden Path, Portland, Oregon',
@@ -144,6 +161,11 @@ export const events: InvitationEvent[] = [
     ],
     rsvpDeadline: 'October 1',
     hosts: 'The Demo Party Committee',
+    photos: {
+      uploadsEnabled: false,
+      galleryEnabled: false,
+      uploadTokenEnv: 'PHOTO_UPLOAD_TOKEN_BIRTHDAY',
+    },
     theme: birthdayTheme,
     demonstration: true,
   },

@@ -2,6 +2,7 @@ node_modules/
 dist/
 .astro/
 .wrangler/
+wrangler.local.jsonc
 .dev.vars
 .env
 .env.*

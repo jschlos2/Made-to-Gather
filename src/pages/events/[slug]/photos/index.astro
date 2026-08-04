@@ -1,0 +1,27 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { events, getThemeStyle, type InvitationEvent } from '../../../../data/events';
+export const getStaticPaths = (() => events.filter((event) => event.photos.galleryEnabled).map((event) => ({ params: { slug: event.slug }, props: { event } }))) satisfies GetStaticPaths;
+const { event } = Astro.props as { event: InvitationEvent };
+---
+<BaseLayout title={`Photos · ${event.title}`} description={`Approved guest photos from ${event.title}`} robots="noindex, nofollow, noarchive" referrer="no-referrer" themeStyle={getThemeStyle(event.theme)} themeClass={event.theme.name}>
+  <main class="gallery-page" data-gallery data-event={event.slug}>
+    <a href={`/events/${event.slug}`}>← Return to invitation</a>
+    <header><p>Private event album</p><h1>Event photos</h1><p>Photos shared by guests and approved by the host.</p></header>
+    <p data-gallery-status role="status" aria-live="polite">Loading photos…</p>
+    <div class="gallery-grid" data-gallery-grid></div>
+    <dialog data-lightbox aria-label="Photo viewer"><button type="button" data-close aria-label="Close photo viewer">×</button><button type="button" data-previous aria-label="Previous photo">←</button><img alt="Selected event photo" /><button type="button" data-next aria-label="Next photo">→</button></dialog>
+  </main>
+</BaseLayout>
+<script>
+  const page = document.querySelector<HTMLElement>('[data-gallery]'); const grid = document.querySelector<HTMLElement>('[data-gallery-grid]'); const status = document.querySelector<HTMLElement>('[data-gallery-status]');
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]'); const large = dialog?.querySelector('img'); let sources:string[]=[]; let selected=0;
+  const show = (index:number) => { if (!dialog || !large || !sources.length) return; selected=(index+sources.length)%sources.length; large.src=sources[selected]; if(!dialog.open)dialog.showModal(); };
+  fetch(`/api/photos/gallery/${page?.dataset.event}`).then(async response => { const data=await response.json(); if(!response.ok)throw new Error(data.message); sources=(data.photos||[]).map((p:{src:string})=>p.src); grid?.replaceChildren(); sources.forEach((src,index)=>{const button=document.createElement('button');button.type='button';button.setAttribute('aria-label',`Open event photo ${index+1}`);const img=document.createElement('img');img.src=src;img.alt=`Event photo ${index+1}`;img.loading='lazy';img.width=600;img.height=600;button.append(img);button.addEventListener('click',()=>show(index));grid?.append(button)}); if(status)status.textContent=sources.length?`${sources.length} approved photo${sources.length===1?'':'s'}.`:'No photos have been approved yet.'; }).catch(()=>{if(status)status.textContent='The gallery could not be loaded.'});
+  dialog?.querySelector('[data-close]')?.addEventListener('click',()=>dialog.close()); dialog?.querySelector('[data-previous]')?.addEventListener('click',()=>show(selected-1)); dialog?.querySelector('[data-next]')?.addEventListener('click',()=>show(selected+1));
+  dialog?.addEventListener('click',(event)=>{if(event.target===dialog)dialog.close()}); dialog?.addEventListener('keydown',(event)=>{if(event.key==='ArrowLeft')show(selected-1);if(event.key==='ArrowRight')show(selected+1)});
+</script>
+<style>
+  .gallery-page{width:min(72rem,100%);min-height:100vh;margin:auto;padding:2rem 1.25rem 5rem}.gallery-page>a{color:inherit;font-weight:700}header{margin:3rem 0 2rem}header>p:first-child{font-family:var(--font-label);letter-spacing:.12em;text-transform:uppercase}h1{margin:.3rem 0 1rem;font-family:var(--font-display);font-size:clamp(3rem,14vw,6rem);line-height:.95;text-transform:none}.gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}.gallery-grid button{padding:0;border:0;background:none;cursor:zoom-in}.gallery-grid img{display:block;width:100%;aspect-ratio:1;object-fit:cover}dialog{width:min(62rem,94vw);padding:3.5rem 3rem 1rem;border:0;background:#171713;color:white}dialog::backdrop{background:rgba(20,20,16,.86)}dialog img{display:block;width:100%;max-height:78vh;object-fit:contain}dialog button{position:absolute;width:44px;height:44px;border:0;background:white;color:#171713;font-size:1.5rem;cursor:pointer}[data-close]{top:.25rem;right:.25rem}[data-previous]{left:.25rem;top:50%}[data-next]{right:.25rem;top:50%}@media(min-width:48rem){.gallery-page{padding:4rem 2rem 7rem}.gallery-grid{grid-template-columns:repeat(3,1fr);gap:1rem}}@media(min-width:70rem){.gallery-grid{grid-template-columns:repeat(4,1fr)}}
+</style>

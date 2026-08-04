@@ -1,0 +1,238 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { events } from '../../data/events';
+import HostPhotos from '../../components/HostPhotos.astro';
+---
+
+<BaseLayout
+  title="Host RSVP dashboard"
+  description="Private RSVP response dashboard"
+  robots="noindex, nofollow, noarchive"
+  themeClass="host-page"
+>
+  <main class="host-dashboard">
+    <header class="host-header">
+      <div>
+        <p class="host-kicker">Private host view</p>
+        <h1>RSVP responses</h1>
+        <p>Attendance totals and guest notes for your invitations.</p>
+      </div>
+      <a class="host-export" data-csv-link href="/host/api/rsvps?format=csv">Export CSV</a>
+    </header>
+
+    <form class="host-controls" data-dashboard-controls>
+      <label>
+        Event
+        <select name="event">
+          <option value="all">All events</option>
+          {events.map((event) => <option value={event.slug}>{event.title}</option>)}
+        </select>
+      </label>
+      <label>
+        Attendance
+        <select name="attendance">
+          <option value="all">Everyone</option>
+          <option value="attending">Attending</option>
+          <option value="declines">Unable to attend</option>
+        </select>
+      </label>
+      <label>
+        Sort
+        <select name="sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name">Guest name</option>
+        </select>
+      </label>
+    </form>
+
+    <p class="host-status" data-host-status aria-live="polite">Loading responses…</p>
+
+    <dl class="host-summary" aria-label="RSVP totals">
+      <div><dt>Attending</dt><dd data-total="attending">—</dd></div>
+      <div><dt>Unable to attend</dt><dd data-total="declines">—</dd></div>
+      <div><dt>Adults</dt><dd data-total="adults">—</dd></div>
+      <div><dt>Children</dt><dd data-total="children">—</dd></div>
+    </dl>
+
+    <div class="host-table-wrap">
+      <table>
+        <caption class="visually-hidden">Submitted RSVP responses</caption>
+        <thead>
+          <tr>
+            <th scope="col">Guest</th>
+            <th scope="col">Mobile</th>
+            <th scope="col">Response</th>
+            <th scope="col">Party</th>
+            <th scope="col">Dietary restrictions</th>
+            <th scope="col">Message</th>
+            <th scope="col">Submitted</th>
+            <th scope="col">Contact</th>
+          </tr>
+        </thead>
+        <tbody data-rsvp-list></tbody>
+      </table>
+    </div>
+    <HostPhotos />
+  </main>
+</BaseLayout>
+
+<script>
+  import { copyMessage } from '../../scripts/copy-message.js';
+
+  const controls = document.querySelector<HTMLFormElement>('[data-dashboard-controls]');
+  const status = document.querySelector<HTMLElement>('[data-host-status]');
+  const list = document.querySelector<HTMLTableSectionElement>('[data-rsvp-list]');
+  const csvLink = document.querySelector<HTMLAnchorElement>('[data-csv-link]');
+  const totals = new Map(
+    Array.from(document.querySelectorAll<HTMLElement>('[data-total]')).map((element) => [element.dataset.total, element]),
+  );
+
+  function cell(text: unknown, className?: string): HTMLTableCellElement {
+    const element = document.createElement('td');
+    element.textContent = text === null || text === undefined || text === '' ? '—' : String(text);
+    if (className) element.className = className;
+    return element;
+  }
+
+  function mobileCell(rsvp: Record<string, unknown>): HTMLTableCellElement {
+    const element = cell(rsvp.masked_mobile_number);
+    if (typeof rsvp.mobile_number !== 'string' || !rsvp.mobile_number) return element;
+    const value = document.createElement('span');
+    value.textContent = String(rsvp.masked_mobile_number);
+    const reveal = document.createElement('button');
+    reveal.type = 'button';
+    reveal.className = 'host-inline-action';
+    reveal.textContent = 'Reveal';
+    reveal.setAttribute('aria-label', `Reveal mobile number for ${String(rsvp.guest_name)}`);
+    let revealed = false;
+    reveal.addEventListener('click', () => {
+      revealed = !revealed;
+      value.textContent = revealed ? String(rsvp.mobile_number) : String(rsvp.masked_mobile_number);
+      reveal.textContent = revealed ? 'Hide' : 'Reveal';
+      reveal.setAttribute('aria-label', `${revealed ? 'Hide' : 'Reveal'} mobile number for ${String(rsvp.guest_name)}`);
+    });
+    element.replaceChildren(value, document.createTextNode(' '), reveal);
+    return element;
+  }
+
+  function contactCell(rsvp: Record<string, unknown>): HTMLTableCellElement {
+    const element = document.createElement('td');
+    if (typeof rsvp.sms_uri !== 'string' || typeof rsvp.text_message !== 'string') {
+      element.textContent = 'No mobile number';
+      return element;
+    }
+    const actions = document.createElement('div');
+    actions.className = 'host-contact-actions';
+    const textLink = document.createElement('a');
+    textLink.href = rsvp.sms_uri;
+    textLink.textContent = 'Text guest';
+    textLink.setAttribute('aria-label', `Open a text message to ${String(rsvp.guest_name)}`);
+    const copyButton = document.createElement('button');
+    copyButton.type = 'button';
+    copyButton.textContent = 'Copy message';
+    copyButton.setAttribute('aria-label', `Copy text message for ${String(rsvp.guest_name)}`);
+    const feedback = document.createElement('span');
+    feedback.className = 'host-copy-feedback';
+    feedback.setAttribute('role', 'status');
+    feedback.setAttribute('aria-live', 'polite');
+    copyButton.addEventListener('click', async () => {
+      const copied = await copyMessage(String(rsvp.text_message));
+      feedback.textContent = copied ? 'Message copied.' : 'Copy is unavailable. Open Text guest and copy from the draft.';
+    });
+    actions.append(textLink, copyButton, feedback);
+    element.append(actions);
+    return element;
+  }
+
+  function currentParameters(): URLSearchParams {
+    const data = new FormData(controls ?? undefined);
+    return new URLSearchParams({
+      event: String(data.get('event') ?? 'all'),
+      attendance: String(data.get('attendance') ?? 'all'),
+      sort: String(data.get('sort') ?? 'newest'),
+    });
+  }
+
+  async function loadResponses(): Promise<void> {
+    if (!controls || !status || !list || !csvLink) return;
+    const parameters = currentParameters();
+    status.textContent = 'Loading responses…';
+    controls.setAttribute('aria-busy', 'true');
+    csvLink.href = `/host/api/rsvps?${parameters}&format=csv`;
+
+    try {
+      const response = await fetch(`/host/api/rsvps?${parameters}`, { headers: { Accept: 'application/json' } });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.ok) throw new Error(result?.message || 'Responses could not be loaded.');
+
+      for (const name of ['attending', 'declines', 'adults', 'children']) {
+        const target = totals.get(name);
+        if (target) target.textContent = String(result.summary?.[name] ?? 0);
+      }
+
+      list.replaceChildren();
+      for (const rsvp of result.rsvps ?? []) {
+        const row = document.createElement('tr');
+        row.append(
+          cell(rsvp.guest_name, 'host-guest'),
+          mobileCell(rsvp),
+          cell(rsvp.attendance_status === 'attending' ? 'Attending' : 'Unable to attend'),
+          cell(`${rsvp.adults} adult${rsvp.adults === 1 ? '' : 's'}, ${rsvp.children} child${rsvp.children === 1 ? '' : 'ren'}`),
+          cell(rsvp.dietary_restrictions),
+          cell(rsvp.message),
+          cell(new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(rsvp.submitted_at))),
+          contactCell(rsvp),
+        );
+        list.append(row);
+      }
+      status.textContent = result.rsvps?.length
+        ? `${result.rsvps.length} response${result.rsvps.length === 1 ? '' : 's'} shown${result.truncated ? ' (list limit reached)' : ''}.`
+        : 'No responses match these filters.';
+    } catch (error) {
+      list.replaceChildren();
+      status.textContent = error instanceof Error ? error.message : 'Responses could not be loaded.';
+      status.classList.add('host-status--error');
+    } finally {
+      controls.removeAttribute('aria-busy');
+    }
+  }
+
+  controls?.addEventListener('change', () => {
+    status?.classList.remove('host-status--error');
+    void loadResponses();
+  });
+  void loadResponses();
+</script>
+
+<style>
+  .host-page { background: #f3eddd; }
+  .host-dashboard { width: min(92rem, 100%); min-height: 100vh; margin: auto; padding: clamp(1.25rem, 4vw, 4rem); }
+  .host-header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--color-ink); }
+  .host-kicker { margin-bottom: .4rem; font-family: var(--font-label); font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .host-header h1 { max-width: none; margin: 0 0 .35rem; font-family: var(--font-display); font-size: clamp(2.5rem, 8vw, 5rem); letter-spacing: -.04em; line-height: .95; text-transform: none; }
+  .host-header p:last-child { margin: 0; }
+  .host-export { display: inline-flex; min-height: 2.75rem; align-items: center; padding: .65rem 1rem; border: 1px solid var(--color-ink); background: var(--color-ink); color: var(--color-white); font-family: var(--font-label); font-weight: 800; letter-spacing: .05em; text-decoration: none; text-transform: uppercase; }
+  .host-export:hover { transform: translateY(-1px); }
+  .host-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); margin: 1.5rem 0; gap: 1rem; }
+  .host-controls label { display: grid; gap: .35rem; font-family: var(--font-label); font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .host-controls select { min-height: 2.75rem; padding: .45rem .65rem; border: var(--border); border-radius: var(--radius); background: var(--color-white); color: var(--color-ink); }
+  .host-status { min-height: 1.5rem; margin-bottom: 1rem; }
+  .host-status--error { color: #8f2f24; font-weight: 700; }
+  .host-summary { display: grid; grid-template-columns: repeat(2, 1fr); margin: 0 0 1.5rem; border-top: var(--border); border-left: var(--border); }
+  .host-summary div { padding: 1rem; border-right: var(--border); border-bottom: var(--border); }
+  .host-summary dt { font-family: var(--font-label); font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .host-summary dd { margin: .15rem 0 0; color: var(--color-coral); font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 800; }
+  .host-table-wrap { overflow-x: auto; border: var(--border); background: rgba(255,255,255,.28); }
+  table { width: 100%; min-width: 64rem; border-collapse: collapse; }
+  th, td { padding: .8rem; border-bottom: var(--border); text-align: left; vertical-align: top; }
+  th { background: var(--color-green); color: var(--color-white); font-family: var(--font-label); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .host-guest { font-weight: 800; }
+  .host-inline-action { margin-left: .25rem; padding: 0; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+  .host-contact-actions { display: grid; justify-items: start; gap: .45rem; }
+  .host-contact-actions a, .host-contact-actions button { padding: 0; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
+  .host-copy-feedback { max-width: 13rem; font-size: .72rem; }
+  .host-inline-action:focus-visible, .host-contact-actions a:focus-visible, .host-contact-actions button:focus-visible { outline: 3px solid var(--color-coral); outline-offset: 3px; }
+  @media (min-width: 48rem) { .host-summary { grid-template-columns: repeat(4, 1fr); } }
+</style>
