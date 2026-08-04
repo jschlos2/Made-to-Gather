@@ -1,0 +1,25 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import InvitationPage from '../../components/InvitationPage.astro';
+import { events, getThemeStyle, type InvitationEvent } from '../../data/events';
+
+export const getStaticPaths = (() => events.map((event) => ({
+  params: { slug: event.slug },
+  props: { event },
+}))) satisfies GetStaticPaths;
+
+interface Props { event: InvitationEvent }
+const { event } = Astro.props;
+const themeClass = [event.theme.name, ...(event.theme.decorativeClasses ?? [])].join(' ');
+---
+
+<BaseLayout
+  title={event.title}
+  description={`${event.subtitle}. ${event.date.weekday}, ${event.date.monthDay}, ${event.date.year}.`}
+  themeColor={event.theme.colors.paper}
+  themeStyle={getThemeStyle(event.theme)}
+  themeClass={themeClass}
+>
+  <InvitationPage event={event} />
+</BaseLayout>

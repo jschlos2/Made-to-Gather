@@ -1,0 +1,29 @@
+---
+import type { InvitationEvent } from '../data/events';
+interface Props { event: InvitationEvent }
+const { event } = Astro.props;
+---
+
+<main>
+  <section class="event-details" aria-labelledby="details-title">
+    <p class="section-kicker">{event.eyebrow}</p>
+    <h2 id="details-title">
+      <span>{event.date.weekday},</span>
+      {event.date.monthDay}
+    </h2>
+    <p class="event-details__time">{event.time}</p>
+    <div class="event-details__description">
+      {event.description.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+
+    <dl class="party-notes">
+      {event.details.map((detail) => (
+        <div>
+          <dt>{detail.label}<span aria-hidden="true">—</span></dt>
+          <dd>{detail.text}</dd>
+        </div>
+      ))}
+    </dl>
+    <a class="map-link" href={event.location.mapUrl} target="_blank" rel="noreferrer">Open location in Maps <span aria-hidden="true">↗</span></a>
+  </section>
+</main>

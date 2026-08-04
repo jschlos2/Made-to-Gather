@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+.dev.vars
+.env
+.env.*
+!.env.example
+.npm-debug.log*
+npm-debug.log*
+*.log
+.DS_Store
+.idea/
+.vscode/
+.codex/
+work/
+outputs/

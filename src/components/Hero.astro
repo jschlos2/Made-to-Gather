@@ -1,0 +1,21 @@
+---
+import type { InvitationEvent } from '../data/events';
+interface Props { event: InvitationEvent }
+const { event } = Astro.props;
+---
+
+<header class="hero" aria-labelledby="event-title">
+  <div class="hero__poster-wrap">
+    <img
+      class="hero__poster"
+      src={event.artwork.src}
+      alt={event.artwork.alt}
+      width={event.artwork.width}
+      height={event.artwork.height}
+      fetchpriority="high"
+    />
+  </div>
+  <h1 id="event-title">{event.title}</h1>
+  <p class="hero__subtitle">{event.subtitle}</p>
+  <a class="hero__rsvp-link" href="#rsvp">RSVP below <span aria-hidden="true">↓</span></a>
+</header>

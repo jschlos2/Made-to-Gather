@@ -1,0 +1,21 @@
+---
+import type { InvitationEvent } from '../data/events';
+import Hero from './Hero.astro';
+import EventDetails from './EventDetails.astro';
+import RsvpForm from './RsvpForm.astro';
+import Footer from './Footer.astro';
+
+interface Props { event: InvitationEvent }
+const { event } = Astro.props;
+---
+
+<div class="invitation-shell">
+  <div class="invitation-shell__art">
+    <Hero event={event} />
+  </div>
+  <div class="invitation-shell__content">
+    <EventDetails event={event} />
+    <RsvpForm event={event} />
+    <Footer hosts={event.hosts} />
+  </div>
+</div>

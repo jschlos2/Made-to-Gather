@@ -1,0 +1,101 @@
+---
+import type { InvitationEvent } from '../data/events';
+interface Props { event: InvitationEvent }
+const { event } = Astro.props;
+---
+
+<section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
+  <div class="rsvp__intro">
+    <h2 id="rsvp-title">Will you be there?</h2>
+    <p>Please reply by {event.rsvpDeadline}. This preview won’t save or send your response.</p>
+  </div>
+
+  <form class="rsvp__form" data-rsvp-form>
+    <div class="field field--full">
+      <label for="guest-name">Your name</label>
+      <input id="guest-name" name="guestName" type="text" autocomplete="name" required />
+    </div>
+
+    <div class="field field--full">
+      <label for="mobile-number">Mobile number <span>(optional)</span></label>
+      <input id="mobile-number" name="mobileNumber" type="tel" autocomplete="tel" inputmode="tel" />
+    </div>
+
+    <fieldset class="field field--full choice-group">
+      <legend>Your response</legend>
+      <label><input type="radio" name="attendance" value="attending" required checked /> <span>Yes</span></label>
+      <label><input type="radio" name="attendance" value="declines" required /> <span>No</span></label>
+    </fieldset>
+
+    <div class="field count-field">
+      <label for="adults">Adults attending</label>
+      <input id="adults" name="adults" type="number" inputmode="numeric" min="0" max="12" value="1" required />
+    </div>
+    <div class="field count-field">
+      <label for="children">Children attending</label>
+      <input id="children" name="children" type="number" inputmode="numeric" min="0" max="12" value="0" required />
+    </div>
+
+    <div class="field field--full">
+      <label for="dietary">Dietary restrictions <span>(optional)</span></label>
+      <input id="dietary" name="dietary" type="text" />
+    </div>
+
+    <div class="field field--full">
+      <label for="message">Notes <span>(optional)</span></label>
+      <textarea id="message" name="message" rows="3"></textarea>
+    </div>
+
+    <button class="ticket-button field--full" type="submit"><span>Send RSVP</span></button>
+    <p class="form-note field--full">Demo only—nothing is stored or sent.</p>
+  </form>
+
+  <div class="rsvp__confirmation" data-confirmation hidden tabindex="-1">
+    <div class="confirmation__copy">
+      <h3>Thank you!</h3>
+      <p class="confirmation__status" data-confirmation-status>Your RSVP has been received</p>
+      <p data-confirmation-copy>We can’t wait to celebrate with you! You’ll receive a confirmation message with the party details.</p>
+    </div>
+    <div class="confirmation__garden" data-confirmation-garden>
+      <p data-signoff>See you there!</p>
+      <div class="flowers" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+    <p class="confirmation__aside">This is a visual preview. Your response has not been saved or sent.</p>
+    <button class="text-button" type="button" data-edit-response>Return to the form</button>
+  </div>
+</section>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-rsvp-form]');
+  const confirmation = document.querySelector<HTMLElement>('[data-confirmation]');
+  const confirmationStatus = document.querySelector<HTMLElement>('[data-confirmation-status]');
+  const confirmationCopy = document.querySelector<HTMLElement>('[data-confirmation-copy]');
+  const signoff = document.querySelector<HTMLElement>('[data-signoff]');
+  const garden = document.querySelector<HTMLElement>('[data-confirmation-garden]');
+  const editButton = document.querySelector<HTMLButtonElement>('[data-edit-response]');
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!form.reportValidity() || !confirmation) return;
+    const data = new FormData(form);
+    const isAttending = data.get('attendance') === 'attending';
+    if (confirmationStatus) confirmationStatus.textContent = isAttending ? 'Your RSVP has been received' : 'Your response has been received';
+    if (confirmationCopy) confirmationCopy.textContent = isAttending
+      ? 'We can’t wait to celebrate with you! You’ll receive a confirmation message with the party details.'
+      : 'We’ll miss celebrating with you but look forward to seeing you soon!';
+    if (signoff) signoff.textContent = isAttending ? 'See you there!' : 'See you next time!';
+    garden?.classList.toggle('confirmation__garden--declined', !isAttending);
+    form.hidden = true;
+    confirmation.hidden = false;
+    confirmation.focus();
+  });
+
+  editButton?.addEventListener('click', () => {
+    if (!form || !confirmation) return;
+    confirmation.hidden = true;
+    form.hidden = false;
+    form.querySelector<HTMLInputElement>('input')?.focus();
+  });
+</script>
