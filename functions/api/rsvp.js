@@ -1,5 +1,6 @@
 import { getEventBySlug } from '../../src/data/events.ts';
 import { normalizeUsMobileNumber } from '../lib/phone.js';
+import { getLifecycle, publicLifecycle } from '../lib/lifecycle.js';
 
 const MAX_BODY_BYTES = 8_192;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -172,6 +173,10 @@ export async function onRequest(context) {
   }
 
   const value = validated.value;
+  const lifecycle = await getLifecycle(env, value.eventSlug);
+  if (!lifecycle || !publicLifecycle(lifecycle).rsvpOpen) {
+    return json({ ok: false, message: 'RSVPs are currently closed for this event.' }, 409);
+  }
   try {
     const result = await env.DB.prepare(`
       INSERT INTO rsvps (

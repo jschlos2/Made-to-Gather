@@ -32,6 +32,16 @@ export interface EventTheme {
   };
 }
 
+export const eventStatuses = ['draft', 'rsvp_open', 'rsvp_closed', 'event_day', 'photos_open', 'archived'] as const;
+export type EventStatus = typeof eventStatuses[number];
+
+export interface EventLifecycleDefaults {
+  status: EventStatus;
+  rsvpOpen: boolean;
+  photoUploadsOpen: boolean;
+  archiveSummary?: string;
+}
+
 export interface InvitationEvent {
   slug: string;
   eyebrow: string;
@@ -58,6 +68,7 @@ export interface InvitationEvent {
   details: EventDetail[];
   rsvpDeadline: string;
   hosts: string;
+  lifecycle: EventLifecycleDefaults;
   photos: {
     uploadsEnabled: boolean;
     galleryEnabled: boolean;
@@ -126,6 +137,12 @@ export const events: InvitationEvent[] = [
     ],
     rsvpDeadline: 'August 20',
     hosts: 'The Robertson Family',
+    lifecycle: {
+      status: 'rsvp_open',
+      rsvpOpen: true,
+      photoUploadsOpen: true,
+      archiveSummary: 'A sunny afternoon celebrating Jennifer’s graduation with family, tacos, and plenty of backyard fun.',
+    },
     photos: {
       uploadsEnabled: true,
       galleryEnabled: true,
@@ -161,6 +178,12 @@ export const events: InvitationEvent[] = [
     ],
     rsvpDeadline: 'October 1',
     hosts: 'The Demo Party Committee',
+    lifecycle: {
+      status: 'draft',
+      rsvpOpen: false,
+      photoUploadsOpen: false,
+      archiveSummary: 'A demonstration gathering used to preview the reusable invitation system.',
+    },
     photos: {
       uploadsEnabled: false,
       galleryEnabled: false,

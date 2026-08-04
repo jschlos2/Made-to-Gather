@@ -1,0 +1,14 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import InvitationPage from '../../../../components/InvitationPage.astro';
+import { events, getThemeStyle, type InvitationEvent } from '../../../../data/events';
+export const getStaticPaths = (() => events.map(event => ({ params:{slug:event.slug}, props:{event} }))) satisfies GetStaticPaths;
+const { event } = Astro.props as { event: InvitationEvent };
+const themeClass=[event.theme.name,...(event.theme.decorativeClasses??[]),'host-event-preview'].join(' ');
+---
+<BaseLayout title={`Preview · ${event.title}`} description="Authenticated host event preview" robots="noindex, nofollow, noarchive" referrer="no-referrer" themeColor={event.theme.colors.paper} themeStyle={getThemeStyle(event.theme)} themeClass={themeClass}>
+  <aside class="preview-banner"><strong>Host preview</strong><a href={`/host/events/${event.slug}/edit/`}>Lifecycle settings</a><a href="/host/archive/">Archive</a></aside>
+  <InvitationPage event={event}/>
+</BaseLayout>
+<style>.preview-banner{position:relative;z-index:20;display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem 1rem;padding:.7rem;background:#172d36;color:white;font-family:system-ui,sans-serif}.preview-banner a{color:white}</style>

@@ -10,6 +10,7 @@
     "db:migrate:local": "npx wrangler@latest d1 migrations apply made-to-gather-rsvps --local --config wrangler.local.jsonc",
     "preview": "astro preview",
     "verify:host-auth": "node scripts/verify-host-auth.mjs",
+    "verify:lifecycle": "node scripts/verify-lifecycle.mjs",
     "verify:messaging": "node scripts/verify-messaging.mjs",
     "verify:photos": "node scripts/verify-photos.mjs",
     "verify:rsvp": "node scripts/verify-rsvp.mjs",

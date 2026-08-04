@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { events } from '../../data/events';
 import HostPhotos from '../../components/HostPhotos.astro';
+import HostEvents from '../../components/HostEvents.astro';
 ---
 
 <BaseLayout
@@ -11,6 +12,7 @@ import HostPhotos from '../../components/HostPhotos.astro';
   themeClass="host-page"
 >
   <main class="host-dashboard">
+    <HostEvents />
     <header class="host-header">
       <div>
         <p class="host-kicker">Private host view</p>
@@ -87,6 +89,9 @@ import HostPhotos from '../../components/HostPhotos.astro';
   const totals = new Map(
     Array.from(document.querySelectorAll<HTMLElement>('[data-total]')).map((element) => [element.dataset.total, element]),
   );
+  const initialEvent = new URL(location.href).searchParams.get('event');
+  const eventControl = controls?.elements.namedItem('event') as HTMLSelectElement | null;
+  if (eventControl && initialEvent && Array.from(eventControl.options).some((option) => option.value === initialEvent)) eventControl.value = initialEvent;
 
   function cell(text: unknown, className?: string): HTMLTableCellElement {
     const element = document.createElement('td');

@@ -1,9 +1,12 @@
 import { DAILY_UPLOAD_LIMIT, MAX_PHOTO_BYTES, PHOTO_TYPES, magicMatches, photoBindings, photoEvent, photoJson, readBoundedBody, safeFilename, tokenIsValid, uploadFingerprint, validPhotoId } from '../../../lib/photos.js';
+import { getLifecycle, publicLifecycle } from '../../../lib/lifecycle.js';
 
 export async function onRequest(context) {
   if (!['GET', 'POST'].includes(context.request.method)) return photoJson({ ok: false, message: 'Method not allowed.' }, 405);
   const event = photoEvent(context.params.event);
   if (!event?.photos.uploadsEnabled) return photoJson({ ok: false, message: 'Photo uploads are unavailable.' }, 404);
+  const lifecycle = await getLifecycle(context.env, event.slug);
+  if (!lifecycle || !publicLifecycle(lifecycle).photoUploadsOpen) return photoJson({ ok: false, message: 'Photo uploads are currently closed.' }, 404);
   const token = context.request.headers.get('X-Upload-Token') || '';
   if (!await tokenIsValid(token, context.env[event.photos.uploadTokenEnv])) return photoJson({ ok: false, message: 'This private upload link is invalid or has expired.' }, 403);
   if (!photoBindings(context.env)) return photoJson({ ok: false, message: 'Photo storage is not configured.' }, 503);

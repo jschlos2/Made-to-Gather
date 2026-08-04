@@ -24,6 +24,9 @@ For a clean dependency install matching `package-lock.json`, use `npm ci`. The p
 - `/events/graduation/` — the primary graduation invitation
 - `/events/birthday/` — a clearly labeled demonstration event
 - `/host/` — the private RSVP dashboard, protected by Cloudflare Access in production
+- `/host/archive/` — the authenticated Made to Gather family archive
+- `/host/events/:slug/edit/` — authenticated lifecycle controls
+- `/host/events/:slug/preview/` — authenticated preview, including draft events
 - `/events/graduation/photos/upload/` — token-gated guest photo upload
 - `/events/graduation/photos/` — approved-only event gallery
 - `/` — a simple event preview index
@@ -40,6 +43,35 @@ Astro generates each event route statically from `src/pages/events/[slug].astro`
 6. Run `npm run build`. The new route will appear in the build output and on the home-page event index.
 
 Set `photos.uploadsEnabled` and `photos.galleryEnabled` for each event. Give `uploadTokenEnv` a unique server environment variable name, such as `PHOTO_UPLOAD_TOKEN_GARDEN_PARTY`; never put the token value in `events.ts`.
+
+Also set typed `lifecycle` defaults. These are the safe fallback before the lifecycle migration is applied; host changes are stored as D1 overrides and do not rewrite source files.
+
+## Event lifecycle and family archive
+
+Every event has one manual lifecycle status plus independent `rsvpOpen` and `photoUploadsOpen` controls. Dates and the configured IANA timezone are displayed to the host, but dates never silently change status or close an event.
+
+| Status | Guest experience |
+| --- | --- |
+| Draft | The public event route returns a generic 404. Hosts use the authenticated preview route. It is not listed publicly and is noindexed. |
+| RSVP open | Invitation details and the RSVP form are available. Photo upload appears only when the separate upload switch is enabled. |
+| RSVP closed | Invitation details remain visible and the form is replaced with a polite closed message. The host can reopen the separate RSVP switch. |
+| Event day | Date, address, parking, and bring-along details receive stronger visual emphasis. Uploads still require the separate photo switch. |
+| Photos open | Details and the approved gallery remain available. The editor defaults RSVPs off and photo uploads on; either switch remains an explicit host decision. |
+| Archived | The invitation becomes a themed keepsake with its artwork, event summary, details, and approved gallery prioritized. RSVP and upload acceptance are forced off in the guest experience. An empty photo message appears when nothing is approved. |
+
+Open `/host/archive/` to see **Drafts**, **Upcoming Gatherings**, and **Past Gatherings**. Open an event’s **Manage** or **Edit event configuration** action to change status and the independent switches. Closing an open RSVP or archiving requires an explicit confirmation. To reopen RSVPs, check **Accept new RSVPs** and save. To open uploads, check **Accept guest photo uploads** and save; the event must also have `photos.uploadsEnabled: true` in `src/data/events.ts`. To archive, choose **Archived**, save, and accept the confirmation prompt.
+
+Lifecycle controls edit operational availability only. Titles, dates, addresses, artwork, summaries, and visual themes remain reviewed code in `src/data/events.ts`; this intentionally avoids turning the family archive into a public or multi-customer content-management system.
+
+Privacy boundaries:
+
+- `/host/`, `/host/archive/`, `/host/events/*`, and `/host/api/*` are authenticated by Cloudflare Access and the existing JWT-validating middleware.
+- Drafts are accessible through authenticated host previews and blocked on public `/events/*` routes.
+- Non-draft `/events/:slug/` pages are **link-only**, not authenticated. They include noindex metadata and response headers and are excluded from the public root page and `robots.txt`, but anyone can forward an unlisted link.
+- Public lifecycle and gallery endpoints return no guest names, phone numbers, RSVP responses, pending photos, upload tokens, or R2 object keys.
+- No sitemap is generated, and the public root route does not enumerate family events.
+
+Lifecycle state is stored by the additive `migrations/0004_create_event_lifecycle.sql` migration. Apply it locally with `npm run db:migrate:local`. Review it before applying remotely with the existing D1 migration command. Until applied, the server safely uses each event’s typed defaults; host changes cannot be persisted.
 
 Do not copy the page or components for a new event.
 
@@ -99,13 +131,19 @@ npx wrangler@latest d1 create made-to-gather-rsvps
 
 Add the binding to both Production and Preview if preview deployments should accept test RSVPs. Redeploy after changing a binding.
 
-3. Review both files in `migrations/`, then explicitly apply pending migrations to the remote database when ready:
+3. Create the ignored local configuration if it does not exist, then replace `REPLACE_WITH_YOUR_D1_DATABASE_ID` with the ID shown by `npx wrangler@latest d1 list`:
 
 ```sh
-npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote
+cp wrangler.example.jsonc wrangler.local.jsonc
 ```
 
-This command changes the remote database. It applies `0002_add_mobile_number.sql` safely with `ALTER TABLE ... ADD COLUMN`, preserving existing rows. It is intentionally not part of the build command and was not run automatically.
+4. Review the files in `migrations/`, then explicitly apply pending migrations to the remote database when ready:
+
+```sh
+npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote --config wrangler.local.jsonc
+```
+
+This command changes the remote database. The migrations are additive and preserve existing RSVP and photo rows. It is intentionally not part of the build command and was not run automatically.
 
 4. Keep the existing Cloudflare Pages build settings:
 
@@ -248,7 +286,7 @@ Uploads accept JPEG, PNG, and WebP only, with a maximum of 8 MB per photo and 5 
 4. Review `migrations/0003_create_event_photos.sql`, then apply pending migrations only when ready:
 
 ```sh
-npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote
+npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote --config wrangler.local.jsonc
 ```
 
 This remote command was not run by Codex. The migration is additive and preserves RSVP rows. Share the private link as `/events/graduation/photos/upload/?token=YOUR_TOKEN`. The page moves the token into session storage and removes it from the visible URL immediately; guests should still avoid forwarding the link. Rotate the encrypted secret if the link is exposed. Existing open sessions retain the old token until their tab/session ends.
@@ -269,7 +307,7 @@ Do not use real guest photos in local tests or make the R2 bucket public. Token 
 
 ## Intentionally deferred
 
-This milestone does not include invitation editing, RSVP modification or deletion, automatic email or SMS sending, bulk messaging, payments, guest accounts, a drag-and-drop editor, analytics, Turnstile, image conversion, or automated data-retention tooling.
+This milestone does not include browser-based editing of invitation wording/artwork, RSVP modification or deletion, automatic email or SMS sending, bulk messaging, payments, guest accounts, a drag-and-drop editor, analytics, Turnstile, image conversion, or automated data-retention tooling.
 
 ## Deploy through GitHub and Cloudflare Pages
 

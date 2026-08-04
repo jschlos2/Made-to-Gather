@@ -10,14 +10,60 @@ interface Props { event: InvitationEvent }
 const { event } = Astro.props;
 ---
 
-<div class="invitation-shell" id="invitation-top">
+<div class="invitation-shell" id="invitation-top" data-invitation-lifecycle data-event-slug={event.slug} data-default-status={event.lifecycle.status}>
   <div class="invitation-shell__art">
     <Hero event={event} />
   </div>
   <div class="invitation-shell__content">
-    <EventDetails event={event} />
+    <section class="keepsake-summary" data-keepsake-summary hidden aria-labelledby="keepsake-title">
+      <p class="section-kicker">A Made to Gather keepsake</p>
+      <h2 id="keepsake-title">Remembering {event.title}</h2>
+      <p>{event.lifecycle.archiveSummary ?? event.description[0]}</p>
+    </section>
+    <div data-event-details><EventDetails event={event} /></div>
     <RsvpForm event={event} />
     <PhotoActions event={event} />
     <Footer hosts={event.hosts} />
   </div>
 </div>
+
+<script>
+  const shell = document.querySelector<HTMLElement>('[data-invitation-lifecycle]');
+  if (shell) {
+    const slug = shell.dataset.eventSlug;
+    fetch(`/api/events/status/${slug}`, { headers: { Accept: 'application/json' } })
+      .then(async (response) => {
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.ok) throw new Error('Event status unavailable');
+        const lifecycle = result.lifecycle;
+        shell.dataset.status = lifecycle.status;
+        shell.classList.toggle('invitation-shell--event-day', lifecycle.status === 'event_day');
+        shell.classList.toggle('invitation-shell--archived', lifecycle.status === 'archived');
+        const summary = shell.querySelector<HTMLElement>('[data-keepsake-summary]');
+        if (summary) summary.hidden = lifecycle.status !== 'archived';
+        const form = shell.querySelector<HTMLFormElement>('[data-rsvp-form]');
+        const closed = shell.querySelector<HTMLElement>('[data-rsvp-closed]');
+        if (form) form.hidden = !lifecycle.rsvpOpen;
+        if (closed) closed.hidden = lifecycle.rsvpOpen;
+        if (lifecycle.status === 'archived') {
+          const photos = shell.querySelector<HTMLElement>('[data-photo-actions]');
+          const details = shell.querySelector<HTMLElement>('[data-event-details]');
+          if (photos && details) details.before(photos);
+        }
+      })
+      .catch(() => {
+        const form = shell.querySelector<HTMLFormElement>('[data-rsvp-form]');
+        const closed = shell.querySelector<HTMLElement>('[data-rsvp-closed]');
+        if (form) form.hidden = true;
+        if (closed) { closed.hidden = false; closed.textContent = 'RSVP availability could not be confirmed. Please try again later.'; }
+      });
+  }
+</script>
+
+<style>
+  .keepsake-summary { padding: clamp(2rem, 7vw, 4rem) clamp(1.25rem, 8vw, 6rem); border-bottom: var(--border); text-align: center; }
+  .keepsake-summary h2 { margin: .5rem auto 1rem; font-family: var(--font-display); font-size: clamp(2.5rem, 9vw, 5rem); line-height: 1; text-transform: none; }
+  .invitation-shell--event-day [data-event-details] { background: color-mix(in srgb, var(--color-paper), var(--color-white) 24%); }
+  .invitation-shell--event-day :global(.party-notes) { border-block: 3px solid var(--color-coral); }
+  .invitation-shell--archived :global(.rsvp) { padding-block: 1.5rem; }
+</style>

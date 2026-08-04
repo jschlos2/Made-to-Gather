@@ -20,6 +20,8 @@ const themeClass = [event.theme.name, ...(event.theme.decorativeClasses ?? [])].
   themeColor={event.theme.colors.paper}
   themeStyle={getThemeStyle(event.theme)}
   themeClass={themeClass}
+  robots="noindex, nofollow, noarchive"
+  referrer="strict-origin-when-cross-origin"
 >
   <InvitationPage event={event} />
 </BaseLayout>

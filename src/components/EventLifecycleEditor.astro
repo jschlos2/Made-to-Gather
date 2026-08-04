@@ -1,0 +1,32 @@
+---
+import type { InvitationEvent } from '../data/events';
+const { event } = Astro.props as { event: InvitationEvent };
+---
+<section class="lifecycle-editor" data-lifecycle-editor data-event={event.slug}>
+  <p class="host-kicker">Host controls</p>
+  <h1>Edit {event.title}</h1>
+  <p>These controls change availability immediately after saving. Event wording, artwork, date, and theme remain in <code>src/data/events.ts</code>.</p>
+  <p data-editor-status role="status" aria-live="polite">Loading current settings…</p>
+  <form data-editor-form hidden>
+    <label>Event status
+      <select name="status">
+        <option value="draft">Draft</option><option value="rsvp_open">RSVP open</option><option value="rsvp_closed">RSVP closed</option><option value="event_day">Event day</option><option value="photos_open">Photos open</option><option value="archived">Archived</option>
+      </select>
+    </label>
+    <label class="editor-check"><input type="checkbox" name="rsvpOpen" /> Accept new RSVPs</label>
+    <label class="editor-check"><input type="checkbox" name="photoUploadsOpen" disabled={!event.photos.uploadsEnabled} /> Accept guest photo uploads</label>
+    {!event.photos.uploadsEnabled && <p class="editor-note">Photo uploads are disabled in this event’s typed configuration.</p>}
+    <button type="submit">Save lifecycle settings</button>
+  </form>
+  <nav><a href="/host/">Host dashboard</a><a href="/host/archive/">Family archive</a><a href={`/host/events/${event.slug}/preview/`}>Authenticated preview</a></nav>
+</section>
+<script>
+  const root=document.querySelector<HTMLElement>('[data-lifecycle-editor]');const form=root?.querySelector<HTMLFormElement>('[data-editor-form]');const message=root?.querySelector<HTMLElement>('[data-editor-status]');const slug=root?.dataset.event||'';const statusSelect=form?.elements.namedItem('status') as HTMLSelectElement|null;const rsvp=form?.elements.namedItem('rsvpOpen') as HTMLInputElement|null;const photos=form?.elements.namedItem('photoUploadsOpen') as HTMLInputElement|null;let initialRsvp=false;
+  const defaults:Record<string,{rsvp?:boolean;photos?:boolean}>={draft:{rsvp:false,photos:false},rsvp_open:{rsvp:true},rsvp_closed:{rsvp:false},event_day:{},photos_open:{rsvp:false,photos:true},archived:{rsvp:false,photos:false}};
+  async function load(){const response=await fetch(`/host/api/events?event=${slug}`);const data=await response.json().catch(()=>null);if(!response.ok||!data?.events?.[0]){if(message)message.textContent=data?.message||'Settings could not be loaded.';return}const event=data.events[0];if(statusSelect)statusSelect.value=event.status;if(rsvp)rsvp.checked=event.rsvpOpen;if(photos)photos.checked=event.photoUploadsOpen;initialRsvp=event.rsvpOpen;if(form)form.hidden=false;if(message)message.textContent=`Current settings loaded from ${event.source}. Dates use ${event.timeZone}.`}
+  statusSelect?.addEventListener('change',()=>{const next=defaults[statusSelect.value];if(rsvp&&typeof next.rsvp==='boolean')rsvp.checked=next.rsvp;if(photos&&!photos.disabled&&typeof next.photos==='boolean')photos.checked=next.photos});
+  form?.addEventListener('submit',async(event)=>{event.preventDefault();if(!statusSelect||!rsvp||!photos)return;const closing=initialRsvp&&!rsvp.checked;const archiving=statusSelect.value==='archived';if(closing&&!confirm('Close RSVPs for this event? Guests will no longer be able to submit the form.'))return;if(archiving&&!confirm('Archive this event as a family keepsake? RSVP and photo uploads will be closed.'))return;const button=form.querySelector<HTMLButtonElement>('button');if(button)button.disabled=true;if(message)message.textContent='Saving…';const response=await fetch('/host/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventSlug:slug,status:statusSelect.value,rsvpOpen:rsvp.checked,photoUploadsOpen:photos.checked,confirmClose:closing,confirmArchive:archiving})});const data=await response.json().catch(()=>null);if(response.ok&&data?.ok){initialRsvp=data.event.rsvpOpen;rsvp.checked=data.event.rsvpOpen;photos.checked=data.event.photoUploadsOpen;if(message)message.textContent='Lifecycle settings saved.'}else if(message)message.textContent=data?.message||'Settings could not be saved.';if(button)button.disabled=false});void load();
+</script>
+<style>
+  .lifecycle-editor{width:min(46rem,100%);min-height:100vh;margin:auto;padding:clamp(2rem,7vw,5rem) 1.25rem}.lifecycle-editor h1{max-width:none;margin:.4rem 0 1rem;font:700 clamp(2.5rem,8vw,5rem)/1 var(--font-display);text-transform:none}.lifecycle-editor form{display:grid;gap:1rem;margin:2rem 0;padding:1.5rem;border:var(--border);background:rgba(255,255,255,.3)}.lifecycle-editor form>label:first-child{display:grid;gap:.4rem;font-weight:700}.lifecycle-editor select,.lifecycle-editor button{min-height:46px}.editor-check{display:flex;align-items:center;gap:.7rem}.editor-check input{width:1.25rem;height:1.25rem}.lifecycle-editor button{border:0;background:var(--color-ink);color:var(--color-white);font-weight:700;cursor:pointer}.lifecycle-editor nav{display:flex;flex-wrap:wrap;gap:1rem}.lifecycle-editor nav a{font-weight:700}
+</style>

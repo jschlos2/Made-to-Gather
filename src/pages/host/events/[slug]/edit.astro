@@ -1,0 +1,9 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import EventLifecycleEditor from '../../../../components/EventLifecycleEditor.astro';
+import { events, type InvitationEvent } from '../../../../data/events';
+export const getStaticPaths = (() => events.map(event => ({ params:{slug:event.slug}, props:{event} }))) satisfies GetStaticPaths;
+const { event } = Astro.props as { event: InvitationEvent };
+---
+<BaseLayout title={`Edit ${event.title}`} description="Private event lifecycle controls" robots="noindex, nofollow, noarchive" themeClass="host-page"><EventLifecycleEditor event={event}/></BaseLayout>

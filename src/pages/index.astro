@@ -1,22 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { events } from '../data/events';
 ---
 
-<BaseLayout title="Invitation previews" description="Available static invitation event previews.">
+<BaseLayout title="Made to Gather" description="Private family gatherings, thoughtfully remembered." robots="noindex, nofollow, noarchive">
   <main class="event-index">
-    <p class="section-kicker">Invitation system</p>
-    <h1>Choose an event</h1>
-    <p>Each invitation below is generated from the same Astro components.</p>
-    <ul>
-      {events.map((event) => (
-        <li>
-          <a href={`/events/${event.slug}/`}>
-            <span>{event.title}</span>
-            {event.demonstration && <small>Demonstration event</small>}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <p class="section-kicker">Made to Gather</p>
+    <h1>Family moments, gathered with care.</h1>
+    <p>Invitations are shared privately by direct link.</p>
   </main>
 </BaseLayout>

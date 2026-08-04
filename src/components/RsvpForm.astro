@@ -19,7 +19,9 @@ const calendarUrl = `https://calendar.google.com/calendar/render?${calendarParam
     <p>Please reply by {event.rsvpDeadline}. Your response will be saved when you submit it.</p>
   </div>
 
-  <form class="rsvp__form" data-rsvp-form data-event-slug={event.slug}>
+  <p class="rsvp__closed" data-rsvp-closed hidden>RSVPs are now closed. Thank you for helping us plan this gathering.</p>
+
+  <form class="rsvp__form" data-rsvp-form data-event-slug={event.slug} hidden={!event.lifecycle.rsvpOpen}>
     <div class="field field--full field--name">
       <label for="guest-name">Your name</label>
       <input id="guest-name" name="guestName" type="text" autocomplete="name" maxlength="120" required />
