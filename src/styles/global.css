@@ -174,13 +174,17 @@ h1 {
   border: 0;
   border-radius: 0;
   background: transparent url('/artwork/rsvp-button.svg') center / 100% 100% no-repeat;
+  box-shadow: none;
   font-size: clamp(1.1rem, 5vw, 1.35rem);
+  transition: transform 160ms ease, filter 160ms ease;
 }
 .theme-graduation .ticket-button::before,
 .theme-graduation .ticket-button::after { display: none; }
+.theme-graduation .ticket-button:hover { transform: scale(1.035); }
 .theme-graduation .ticket-button:focus-visible {
-  outline: 3px solid var(--color-ink);
-  outline-offset: 3px;
+  outline: none;
+  filter: drop-shadow(0 0 3px var(--color-ink));
+  transform: scale(1.025);
 }
 .form-note { margin: -0.2rem 0 0; font-size: 0.68rem; text-align: center; }
 
