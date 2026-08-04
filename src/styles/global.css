@@ -166,6 +166,22 @@ h1 {
 .ticket-button::before { left: -0.3rem; border-radius: 0 1rem 1rem 0; }
 .ticket-button::after { right: -0.3rem; border-radius: 1rem 0 0 1rem; }
 .ticket-button:hover { transform: translateY(-2px) rotate(-0.5deg); }
+.theme-graduation .ticket-button {
+  width: min(20rem, 100%);
+  min-height: 0;
+  aspect-ratio: 325 / 108;
+  margin-top: 0.7rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent url('/artwork/rsvp-button.svg') center / 100% 100% no-repeat;
+  font-size: clamp(1.1rem, 5vw, 1.35rem);
+}
+.theme-graduation .ticket-button::before,
+.theme-graduation .ticket-button::after { display: none; }
+.theme-graduation .ticket-button:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
+}
 .form-note { margin: -0.2rem 0 0; font-size: 0.68rem; text-align: center; }
 
 .rsvp__confirmation { margin: 0 -1.25rem; text-align: center; outline: none; }

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="60 95 325 108" role="img" aria-labelledby="title">
+  <title id="title">Coral ticket-shaped button with gold trim</title>
+  <defs>
+    <clipPath id="left-half">
+      <rect x="33.6" y="34.9" width="203.4" height="214.6"/>
+    </clipPath>
+    <clipPath id="right-half">
+      <rect x="207.5" y="34.9" width="203.4" height="214.6"/>
+    </clipPath>
+  </defs>
+  <g fill="#d96a41">
+    <path clip-path="url(#left-half)" d="M89.6 192.7v-1.6c0-2.6-2.1-4.8-4.8-4.8h-9.7c-2.6 0-4.8-2.1-4.8-4.8v-67.3c0-2.6 2.1-4.8 4.8-4.8h9.7c2.6 0 4.8-2.1 4.8-4.8s2.1-4.8 4.8-4.8h278.8c2.6 0 4.8 2.1 4.8 4.8v88.1c0 2.6-2.1 4.8-4.8 4.8H94.4c-2.6 0-4.8-2.1-4.8-4.8Z"/>
+    <path clip-path="url(#right-half)" d="M354.8 192.7v-1.6c0-2.6 2.1-4.8 4.8-4.8h9.7c2.6 0 4.8-2.1 4.8-4.8v-67.3c0-2.6-2.1-4.8-4.8-4.8h-9.7c-2.6 0-4.8-2.1-4.8-4.8s-2.1-4.8-4.8-4.8H71.2c-2.6 0-4.8 2.1-4.8 4.8v88.1c0 2.6 2.1 4.8 4.8 4.8h278.8c2.6 0 4.8-2.1 4.8-4.8Z"/>
+  </g>
+  <g fill="none" stroke="#c9a349" stroke-width="1.4">
+    <path d="M76.9 178.9v-63.7M95.8 192.8l149.9-.1M95.3 104h159"/>
+    <path d="M367.5 178.9v-63.7M348.6 192.8l-149.9-.1M349.1 104H190.2"/>
+  </g>
+</svg>
