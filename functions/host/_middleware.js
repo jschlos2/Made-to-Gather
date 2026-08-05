@@ -2,6 +2,9 @@ import { isLoopbackRequest, verifyAccessJwt } from '../lib/access-auth.js';
 
 const securityHeaders = {
   'Cache-Control': 'no-store',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Referrer-Policy': 'no-referrer',
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'X-Robots-Tag': 'noindex, nofollow, noarchive',

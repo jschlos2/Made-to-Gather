@@ -3,9 +3,11 @@ import { eventStatuses, getEventBySlug } from '../../src/data/events.ts';
 export const EVENT_STATUSES = new Set(eventStatuses);
 export const lifecycleHeaders = {
   'Cache-Control': 'no-store',
+  'Cross-Origin-Resource-Policy': 'same-origin',
   'Content-Type': 'application/json; charset=utf-8',
   'X-Content-Type-Options': 'nosniff',
   'X-Robots-Tag': 'noindex, nofollow, noarchive',
+  'X-Frame-Options': 'DENY',
 };
 
 export function lifecycleJson(body, status = 200) {

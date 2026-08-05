@@ -8,8 +8,11 @@ const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const responseHeaders = {
   'Cache-Control': 'no-store',
+  'Cross-Origin-Resource-Policy': 'same-origin',
   'Content-Type': 'application/json; charset=utf-8',
   'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-Robots-Tag': 'noindex, nofollow, noarchive',
 };
 
 function json(body, status = 200, extraHeaders = {}) {
@@ -79,9 +82,9 @@ function normalizeMultiline(value, field, maximum, errors) {
   return normalized || null;
 }
 
-function normalizeCount(value, field, errors) {
-  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 12) {
-    errors[field] = 'Enter a whole number from 0 to 12.';
+function normalizeCount(value, field, errors, minimum = 0, maximum = 12) {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < minimum || value > maximum) {
+    errors[field] = `Enter a whole number from ${minimum} to ${maximum}.`;
     return 0;
   }
   return value;
@@ -97,18 +100,20 @@ function validateSubmission(input) {
   if (!UUID_PATTERN.test(submissionId)) errors.form = 'The submission identifier is invalid.';
 
   const eventSlug = typeof input.eventSlug === 'string' ? input.eventSlug.trim().toLowerCase() : '';
-  if (!SLUG_PATTERN.test(eventSlug) || !getEventBySlug(eventSlug)) errors.eventSlug = 'This event is not available.';
+  const configuredEvent = SLUG_PATTERN.test(eventSlug) ? getEventBySlug(eventSlug) : undefined;
+  if (!configuredEvent) errors.eventSlug = 'This event is not available.';
 
   const guestName = normalizeSingleLine(input.guestName, 'guestName', 120, errors, true);
-  const normalizedMobile = normalizeUsMobileNumber(input.mobileNumber);
-  if (normalizedMobile.error) errors.mobileNumber = normalizedMobile.error;
+  const normalizedMobile = input.mobileNumber ? normalizeUsMobileNumber(input.mobileNumber) : { value: null };
+  if (configuredEvent?.rsvp.mobileRequired && !input.mobileNumber) errors.mobileNumber = 'A mobile number is required.';
+  else if (normalizedMobile.error) errors.mobileNumber = normalizedMobile.error;
   const attendance = input.attendance;
   if (attendance !== 'attending' && attendance !== 'declines') {
     errors.attendance = 'Choose whether you are attending.';
   }
 
-  let adults = normalizeCount(input.adults, 'adults', errors);
-  let children = normalizeCount(input.children, 'children', errors);
+  let adults = normalizeCount(input.adults, 'adults', errors, configuredEvent?.rsvp.adultCount.minimum, configuredEvent?.rsvp.adultCount.maximum);
+  let children = normalizeCount(input.children, 'children', errors, configuredEvent?.rsvp.childCount.minimum, configuredEvent?.rsvp.childCount.maximum);
   if (attendance === 'declines') {
     adults = 0;
     children = 0;
@@ -118,8 +123,9 @@ function validateSubmission(input) {
     errors.adults = 'The total party size cannot exceed 20.';
   }
 
-  const dietaryRestrictions = normalizeSingleLine(input.dietaryRestrictions, 'dietaryRestrictions', 500, errors);
+  const dietaryRestrictions = normalizeSingleLine(input.dietaryRestrictions, 'dietaryRestrictions', 500, errors, configuredEvent?.rsvp.dietaryRestrictions.required);
   const message = normalizeMultiline(input.message, 'message', 1000, errors);
+  if (configuredEvent?.rsvp.message.required && !message) errors.message = 'This field is required.';
 
   if (Object.keys(errors).length > 0) return { errors };
   return {

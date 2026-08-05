@@ -31,7 +31,12 @@ const { event } = Astro.props as { event: InvitationEvent };
   const storageKey = `made-to-gather-photo-token:${eventSlug}`;
   const url = new URL(location.href);
   const queryToken = url.searchParams.get('token');
-  if (queryToken) { sessionStorage.setItem(storageKey, queryToken); url.searchParams.delete('token'); history.replaceState(null, '', url); }
+  const hashToken = url.hash.startsWith('#token=') ? decodeURIComponent(url.hash.slice(7)) : '';
+  if (hashToken || queryToken) {
+    sessionStorage.setItem(storageKey, hashToken || queryToken || '');
+    url.searchParams.delete('token'); url.hash = '';
+    history.replaceState(null, '', url);
+  }
   const token = sessionStorage.getItem(storageKey) || '';
   let objectUrls: string[] = [];
   const show = (message: string, error = false) => { if (status) { status.textContent = message; status.classList.toggle('upload-status--error', error); } };
@@ -78,7 +83,7 @@ const { event } = Astro.props as { event: InvitationEvent };
   .file-picker { display:grid; gap:.5rem; font-weight:700; } input[type=file] { min-height:44px; padding:.6rem; border:var(--border); background:var(--color-white); }
   .photo-previews { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; } .photo-previews img { width:100%; aspect-ratio:1; object-fit:cover; }
   .photo-consent { display:flex; gap:.65rem; align-items:flex-start; } .photo-consent input { width:1.25rem; height:1.25rem; flex:none; }
-  button { min-height:48px; border:0; background:var(--color-orange); color:var(--color-white); font:700 1rem var(--font-label); cursor:pointer; text-transform:uppercase; }
+  button { min-height:48px; border:0; background:var(--color-ink); color:var(--color-white); font:700 1rem var(--font-label); cursor:pointer; text-transform:uppercase; }
   button:disabled { opacity:.55; cursor:wait; } .upload-status--error { color:#8f2f24; font-weight:700; }
   @media(min-width:48rem){.photo-page{padding:4rem 2rem 7rem}.photo-previews{grid-template-columns:repeat(5,1fr)}}
 </style>

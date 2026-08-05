@@ -11,9 +11,11 @@ const SORTS = {
 
 const jsonHeaders = {
   'Cache-Control': 'no-store',
+  'Cross-Origin-Resource-Policy': 'same-origin',
   'Content-Type': 'application/json; charset=utf-8',
   'X-Content-Type-Options': 'nosniff',
   'X-Robots-Tag': 'noindex, nofollow, noarchive',
+  'X-Frame-Options': 'DENY',
 };
 
 function json(body, status = 200) {

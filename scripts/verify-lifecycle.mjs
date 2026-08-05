@@ -5,6 +5,17 @@ import { onRequest as eventGuard } from '../functions/_middleware.js';
 import { onRequest as hostEvents } from '../functions/host/api/events.js';
 
 const event = events.find((item) => item.slug === 'graduation');
+const theo = events.find((item) => item.slug === 'theo-first-birthday');
+assert.ok(event, 'Graduation event is required for lifecycle verification.');
+assert.ok(theo, 'Theo’s first birthday event is required.');
+assert.equal(theo.lifecycle.status, 'draft');
+assert.equal(theo.lifecycle.rsvpOpen, false);
+assert.equal(theo.lifecycle.photoUploadsOpen, false);
+assert.equal(theo.photos.uploadsEnabled, false);
+assert.equal(theo.photos.galleryEnabled, false);
+assert.equal(theo.date.monthDay, 'Date TBD');
+assert.equal(theo.time, 'Time TBD');
+assert.ok(theo.theme.buttonStyle && theo.theme.backgroundTreatment, 'Theo’s event must provide reusable theme treatments.');
 const expected = {
   draft: { rsvpOpen: false, photoUploadsOpen: false, galleryEnabled: false },
   rsvp_open: { rsvpOpen: true, photoUploadsOpen: false, galleryEnabled: true },
@@ -18,7 +29,7 @@ for (const [status, behavior] of Object.entries(expected)) {
   assert.deepEqual({ rsvpOpen: state.rsvpOpen, photoUploadsOpen: state.photoUploadsOpen, galleryEnabled: state.galleryEnabled }, behavior, status);
 }
 
-const draftResponse = await eventGuard({ env: {}, request: new Request('https://example.com/events/birthday/'), next: async () => new Response('should not render') });
+const draftResponse = await eventGuard({ env: {}, request: new Request('https://example.com/events/theo-first-birthday/'), next: async () => new Response('should not render') });
 assert.equal(draftResponse.status, 404);
 const openResponse = await eventGuard({ env: {}, request: new Request('https://example.com/events/graduation/'), next: async () => new Response('invitation') });
 assert.equal(openResponse.status, 200);

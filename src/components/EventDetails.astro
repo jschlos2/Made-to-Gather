@@ -24,6 +24,6 @@ const { event } = Astro.props;
         </div>
       ))}
     </dl>
-    <a class="map-link" href={event.location.mapUrl} target="_blank" rel="noreferrer">Open location in Maps <span aria-hidden="true">↗</span></a>
+    {event.location.mapUrl && <a class="map-link" href={event.location.mapUrl} target="_blank" rel="noreferrer">Open location in Maps <span aria-hidden="true">↗</span></a>}
   </section>
 </main>

@@ -1,7 +1,10 @@
 import { photoBindings, photoJson, validPhotoId } from '../../../lib/photos.js';
+import { mutationRequestError } from '../../../lib/request-security.js';
 export async function onRequest(context) {
   if (!validPhotoId(context.params.id) || !photoBindings(context.env)) return photoJson({ ok: false, message: 'Photo not found.' }, 404);
   if (!['PATCH', 'DELETE'].includes(context.request.method)) return photoJson({ ok: false, message: 'Method not allowed.' }, 405);
+  const requestError = mutationRequestError(context.request);
+  if (requestError) return photoJson({ ok:false, message:requestError }, 403);
   const body = await context.request.json().catch(() => ({}));
   const photo = await context.env.DB.prepare('SELECT id, object_key FROM event_photos WHERE id = ?').bind(context.params.id).first();
   if (!photo) return photoJson({ ok: false, message: 'Photo not found.' }, 404);

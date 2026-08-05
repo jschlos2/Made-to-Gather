@@ -2,15 +2,15 @@
 import type { InvitationEvent } from '../data/events';
 interface Props { event: InvitationEvent }
 const { event } = Astro.props;
-const calendarParameters = new URLSearchParams({
+const calendarParameters = event.calendar.start && event.calendar.end ? new URLSearchParams({
   action: 'TEMPLATE',
   text: event.title,
   dates: `${event.calendar.start}/${event.calendar.end}`,
   ctz: event.calendar.timeZone,
   details: event.description.join(' '),
   location: `${event.location.name}, ${event.location.address}`,
-});
-const calendarUrl = `https://calendar.google.com/calendar/render?${calendarParameters.toString()}`;
+}) : null;
+const calendarUrl = calendarParameters ? `https://calendar.google.com/calendar/render?${calendarParameters.toString()}` : null;
 ---
 
 <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
@@ -28,7 +28,7 @@ const calendarUrl = `https://calendar.google.com/calendar/render?${calendarParam
     </div>
 
     <div class="field field--full field--mobile">
-      <label for="mobile-number">Mobile number</label>
+      <label for="mobile-number">Mobile number {!event.rsvp.mobileRequired && <span>(optional)</span>}</label>
       <input
         id="mobile-number"
         name="mobileNumber"
@@ -37,7 +37,7 @@ const calendarUrl = `https://calendar.google.com/calendar/render?${calendarParam
         inputmode="tel"
         maxlength="24"
         aria-describedby="mobile-number-help"
-        required
+        required={event.rsvp.mobileRequired}
       />
       <p class="field-help" id="mobile-number-help">We’ll use this number to confirm your RSVP and share important updates about this event.</p>
     </div>
@@ -49,31 +49,31 @@ const calendarUrl = `https://calendar.google.com/calendar/render?${calendarParam
     </fieldset>
 
     <div class="field count-field count-field--adults">
-      <label for="adults">Adults attending</label>
+      <label for="adults">{event.rsvp.adultCount.label}</label>
       <div class="count-control">
         <button type="button" data-count-change="-1" aria-label="Decrease adults">−</button>
-        <input id="adults" name="adults" type="number" inputmode="numeric" min="0" max="12" value="1" required />
+        <input id="adults" name="adults" type="number" inputmode="numeric" min={event.rsvp.adultCount.minimum} max={event.rsvp.adultCount.maximum} value={event.rsvp.adultCount.defaultValue} required />
         <button type="button" data-count-change="1" aria-label="Increase adults">+</button>
       </div>
     </div>
     <div class="field count-field count-field--children">
-      <label for="children">Children attending</label>
+      <label for="children">{event.rsvp.childCount.label}</label>
       <div class="count-control">
         <button type="button" data-count-change="-1" aria-label="Decrease children">−</button>
-        <input id="children" name="children" type="number" inputmode="numeric" min="0" max="12" value="0" required />
+        <input id="children" name="children" type="number" inputmode="numeric" min={event.rsvp.childCount.minimum} max={event.rsvp.childCount.maximum} value={event.rsvp.childCount.defaultValue} required />
         <button type="button" data-count-change="1" aria-label="Increase children">+</button>
       </div>
     </div>
 
-    <div class="field field--full field--dietary">
-      <label for="dietary">Dietary restrictions <span>(optional)</span></label>
-      <input id="dietary" name="dietary" type="text" maxlength="500" />
-    </div>
+    {event.rsvp.dietaryRestrictions.enabled && <div class="field field--full field--dietary">
+      <label for="dietary">{event.rsvp.dietaryRestrictions.label} {!event.rsvp.dietaryRestrictions.required && <span>(optional)</span>}</label>
+      <input id="dietary" name="dietary" type="text" maxlength="500" required={event.rsvp.dietaryRestrictions.required} />
+    </div>}
 
-    <div class="field field--full field--message">
-      <label for="message">Notes <span>(optional)</span></label>
-      <textarea id="message" name="message" rows="3" maxlength="1000"></textarea>
-    </div>
+    {event.rsvp.message.enabled && <div class="field field--full field--message">
+      <label for="message">{event.rsvp.message.label} {!event.rsvp.message.required && <span>(optional)</span>}</label>
+      <textarea id="message" name="message" rows="3" maxlength="1000" required={event.rsvp.message.required}></textarea>
+    </div>}
 
     <button class="ticket-button field--full" type="submit" data-submit-button><span data-submit-label>Send RSVP</span></button>
     <p class="form-note field--full" data-form-status aria-live="polite" tabindex="-1"></p>
@@ -89,7 +89,7 @@ const calendarUrl = `https://calendar.google.com/calendar/render?${calendarParam
         <div><dt>Location</dt><dd>{event.location.name}<br />{event.location.address}</dd></div>
       </dl>
       <div class="confirmation__actions">
-        <a href={calendarUrl} target="_blank" rel="noopener noreferrer">Add to Calendar<span class="visually-hidden"> (opens in a new tab)</span></a>
+        {calendarUrl && <a href={calendarUrl} target="_blank" rel="noopener noreferrer">Add to Calendar<span class="visually-hidden"> (opens in a new tab)</span></a>}
         <a href="#invitation-top">Return to Invitation</a>
       </div>
     </div>

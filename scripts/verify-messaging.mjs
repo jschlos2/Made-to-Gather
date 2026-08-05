@@ -16,7 +16,7 @@ for (const input of ['', '555-1234', '+44 20 7946 0958', '123-555-1234', '503-CA
 assert(maskUsMobileNumber('+15035551234') === '(***) ***-1234', 'Mobile masking failed.');
 
 const attending = createHostMessage({ event_slug: 'graduation', guest_name: 'Taylor Guest', attendance_status: 'attending' });
-const declining = createHostMessage({ event_slug: 'birthday', guest_name: 'Morgan Guest', attendance_status: 'declines' });
+const declining = createHostMessage({ event_slug: 'theo-first-birthday', guest_name: 'Morgan Guest', attendance_status: 'declines' });
 assert(attending?.includes('Hi Taylor!') && attending.includes('attending') && attending.includes('can’t wait'), 'Attending message failed.');
 assert(declining?.includes('Hi Morgan!') && declining.includes('unable to attend') && !declining.includes('can’t wait'), 'Decline message failed.');
 const smsUri = createSmsUri('+15035551234', attending);

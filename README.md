@@ -1,4 +1,4 @@
-# Jennifer Robertson’s graduation invitation
+# Made to Gather invitations
 
 A reusable multi-event invitation system built with Astro, TypeScript, Cloudflare Pages Functions, and Cloudflare D1. Every event is generated from one shared page and component set; content, artwork, theme colors, font stacks, and decorative classes live in typed configuration. The invitation pages remain statically generated while `/api/rsvp` runs server-side and stores validated responses.
 
@@ -22,7 +22,8 @@ For a clean dependency install matching `package-lock.json`, use `npm ci`. The p
 ## Available routes
 
 - `/events/graduation/` — the primary graduation invitation
-- `/events/birthday/` — a clearly labeled demonstration event
+- `/events/theo-first-birthday/` — Theo’s draft invitation (public access returns 404)
+- `/host/events/theo-first-birthday/preview/` — authenticated host preview of Theo’s draft
 - `/host/` — the private RSVP dashboard, protected by Cloudflare Access in production
 - `/host/archive/` — the authenticated Made to Gather family archive
 - `/host/events/:slug/edit/` — authenticated lifecycle controls
@@ -35,14 +36,26 @@ Astro generates each event route statically from `src/pages/events/[slug].astro`
 
 ## Create another event
 
-1. Open `src/data/events.ts`.
-2. Add another object to the exported `events` array. TypeScript will require the slug, title, subtitle, date, time, location, description, details, RSVP deadline, artwork, theme colors, and font selections.
-3. Put the event artwork in `public/artwork/` and reference it with a root-relative path such as `/artwork/my-event.jpg`. Include its pixel dimensions and useful alternative text.
-4. Choose a unique URL-safe slug such as `garden-party`. Astro will generate `/events/garden-party/` during the next build.
-5. Reuse an existing theme object or define another `EventTheme`. Optional `decorativeClasses` can target event-specific refinements in `src/styles/global.css`.
-6. Run `npm run build`. The new route will appear in the build output and on the home-page event index.
+The repository uses a copy-and-edit TypeScript template—there is no browser editor.
 
-Set `photos.uploadsEnabled` and `photos.galleryEnabled` for each event. Give `uploadTokenEnv` a unique server environment variable name, such as `PHOTO_UPLOAD_TOKEN_GARDEN_PARTY`; never put the token value in `events.ts`.
+### Host guide
+
+1. **Create the event:** copy `src/events/_template/` to `src/events/<slug>/`, rename the exported constant, import it in `src/data/events.ts`, and add it to `events`. Keep a new event in `draft` with `publishReviewComplete: false`.
+2. **Add content:** edit `src/events/<slug>/event.ts`. Set the stable internal ID, public slug, host-facing name, title, subtitle, date, time, IANA timezone, guest-visible location, description, parking/directions, detail sections, deadline, RSVP questions, party-count ranges, and mobile requirement. `hostOnly.privateStreetAddress` is never rendered on the invitation; `location.address` is guest-visible.
+3. **Add artwork:** create `public/events/<slug>/`, add optimized guest-safe exports, and update `artwork.src`, dimensions, and alt text. Do not place Illustrator/Figma source files, secrets, guest data, or private notes in `public/`.
+4. **Select or create a theme:** set colors, display/body/label fonts, button style, background treatment, and optional decorative classes in the event file. Add narrowly scoped rules to `src/styles/global.css` only when theme values are insufficient.
+5. **Preview locally:** run `npm run dev`, then open `/host/events/<slug>/preview/`. Check approximately 390, 768, and 1440 pixels.
+6. **Test RSVP behavior:** run `npm run verify:events`, `npm run verify:rsvp` with the documented local Cloudflare server, and the other `verify:*` commands. Keep real phone numbers and guest data out of tests.
+7. **Publish changes:** run `npm run build`, review the diff, commit, and push through the normal GitHub/Cloudflare workflow. Publishing code does not open a draft event.
+8. **Open RSVPs:** replace all TBD content, set exact calendar dates, set `publishReviewComplete: true`, then use `/host/events/<slug>/edit/` to change status to **RSVP open** and enable RSVPs. The schema rejects a draft with RSVPs enabled and rejects a non-draft that has not been intentionally reviewed.
+9. **Send the link:** share only `/events/<slug>/` with intended guests. If using a private share mechanism, store only its environment-variable name in `privateShareTokenEnv`; never commit the token. An unlisted link can still be forwarded.
+10. **Close RSVPs:** use the authenticated lifecycle editor, disable RSVPs, confirm the warning, and select **RSVP closed**.
+11. **Open photo uploads:** first configure the event’s upload-token secret and storage binding, then enable `photos.uploadsEnabled` in code and explicitly open uploads in the host lifecycle editor. Gallery visibility remains a separate setting.
+12. **Archive the event:** select **Archived** in the host editor and confirm. The guest page becomes a themed keepsake while the authenticated archive retains host controls.
+
+Use `src/events/_template/event.ts` for Jennifer’s December 2026 graduation ceremony, Jennifer’s January 2027 birthday, or Frankie’s January 2027 birthday when those details are ready; no placeholder events for them are registered now.
+
+Set `photos.uploadsEnabled` and `photos.galleryEnabled` for each event. Give `uploadTokenEnv` a unique server environment variable name, such as `PHOTO_UPLOAD_TOKEN_GARDEN_PARTY`; never put the token value in event configuration.
 
 Also set typed `lifecycle` defaults. These are the safe fallback before the lifecycle migration is applied; host changes are stored as D1 overrides and do not rewrite source files.
 
@@ -78,7 +91,7 @@ Do not copy the page or components for a new event.
 ## Customize the invitations
 
 - **Event information and themes:** edit `src/data/events.ts`.
-- **Artwork:** replace `public/artwork/graduation-poster.jpg` and update its dimensions/alternative text in `src/data/events.ts` if needed. The current file is a web-optimized copy of the supplied `gradinvitepostcard.png` artwork.
+- **Artwork:** graduation uses `public/artwork/graduation-poster.jpg`. Theo uses `public/artwork/birthday-balloons.png` only as placeholder art; replace that path with the optimized final Illustrator or Figma export and update its dimensions/alternative text in `src/data/events.ts`.
 - **Colors, fonts, spacing, borders, and shadows:** edit the variables in `:root` at the top of `src/styles/global.css`.
 - **Local fonts:** put licensed `.woff2` files in `public/fonts/`, then enable and update the sample `@font-face` rule in `src/styles/global.css`.
 - **Layout:** reusable sections live in `src/components/InvitationPage.astro`, `Hero.astro`, `EventDetails.astro`, `RsvpForm.astro`, and `Footer.astro`.
@@ -110,7 +123,7 @@ The migration is `migrations/0001_create_rsvps.sql`. It creates:
 
 An index on `(event_slug, submitted_at)` supports event-specific response review.
 
-The second migration adds rather than replaces the mobile-number column, preserving every existing RSVP. It intentionally permits `NULL` for rows submitted before mobile collection was introduced. No email column existed in the original schema, so no email data needed to be migrated or removed.
+The second migration adds rather than replaces the mobile-number column, preserving every existing RSVP. It intentionally permits `NULL` for rows submitted before mobile collection was introduced. Migration `0005_repair_mobile_number_constraint.sql` then rebuilds only the RSVP table, copies every existing row unchanged, and replaces a character-by-character `GLOB` constraint that Cloudflare D1 can reject as too complex. Review and back up D1 before applying this production repair. No email column existed in the original schema, so no email data needed to be migrated or removed.
 
 ## Cloudflare D1 setup
 
@@ -143,7 +156,7 @@ cp wrangler.example.jsonc wrangler.local.jsonc
 npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote --config wrangler.local.jsonc
 ```
 
-This command changes the remote database. The migrations are additive and preserve existing RSVP and photo rows. It is intentionally not part of the build command and was not run automatically.
+This command changes the remote database. The migrations preserve existing RSVP and photo rows; migration `0005` performs a table rebuild to repair the mobile-number constraint. Export a backup and review the pending migration list first. It is intentionally not part of the build command and was not run automatically.
 
 4. Keep the existing Cloudflare Pages build settings:
 
@@ -289,7 +302,7 @@ Uploads accept JPEG, PNG, and WebP only, with a maximum of 8 MB per photo and 5 
 npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote --config wrangler.local.jsonc
 ```
 
-This remote command was not run by Codex. The migration is additive and preserves RSVP rows. Share the private link as `/events/graduation/photos/upload/?token=YOUR_TOKEN`. The page moves the token into session storage and removes it from the visible URL immediately; guests should still avoid forwarding the link. Rotate the encrypted secret if the link is exposed. Existing open sessions retain the old token until their tab/session ends.
+This remote command was not run by Codex. The migration is additive and preserves RSVP rows. Share the private link as `/events/graduation/photos/upload/#token=YOUR_TOKEN`. A URL fragment is not sent in the HTTP request; the page moves it into session storage and removes it from the visible URL. Guests should still avoid forwarding the link. Rotate the encrypted secret if the link is exposed. Existing open sessions retain the old token until their tab/session ends.
 
 The authenticated `/host/` dashboard includes photo filters, previews, individual approve/remove/restore actions, bulk approval for up to 50 selected pending photos, and an explicitly confirmed permanent-delete action. Removal hides an image but retains its R2 object and metadata; permanent deletion removes both and cannot be undone. Only approved images appear publicly, and the invitation reveals “View event photos” only after at least one approval.
 
@@ -307,7 +320,52 @@ Do not use real guest photos in local tests or make the R2 bucket public. Token 
 
 ## Intentionally deferred
 
-This milestone does not include browser-based editing of invitation wording/artwork, RSVP modification or deletion, automatic email or SMS sending, bulk messaging, payments, guest accounts, a drag-and-drop editor, analytics, Turnstile, image conversion, or automated data-retention tooling.
+This milestone does not include browser-based editing of invitation wording/artwork, RSVP modification, automatic email or SMS sending, bulk messaging, payments, guest accounts, a drag-and-drop editor, analytics, Turnstile, image conversion, or automated data-retention tooling. The authenticated host can permanently delete an RSVP or photo with explicit confirmation.
+
+## Release safety and privacy operations
+
+### Route and data boundaries
+
+- **Public:** `/` and `/404.html` contain no event or guest listing.
+- **Link-only, noindex:** non-draft `/events/:slug/`, approved galleries, lifecycle status APIs, and approved-image proxies. These are intentionally unlisted, not authenticated; recipients can forward the link.
+- **Token-gated, noindex:** `/events/:slug/photos/upload/` and its API. Prefer `#token=SECRET` links so the token stays out of the HTTP request URL; legacy `?token=` links are removed immediately but may already appear in edge/request logs.
+- **Authenticated:** every `/host/**` page and API is protected by Cloudflare Access plus server-side JWT issuer, audience, signature, expiry, and not-before validation. Production must never use the local bypass.
+- **Drafts:** public event routes return a generic 404. Only authenticated host previews render them.
+
+RSVP names, normalized mobile numbers, attendance, party counts, dietary restrictions, messages, and timestamps are stored only in D1. The authenticated RSVP API returns them to the dashboard; phone numbers are masked until explicitly revealed. CSV exports intentionally omit phone numbers, but still contain sensitive guest data and should be stored securely and deleted when no longer needed. Server logs contain operational error categories, not form values or full phone numbers.
+
+Photo bytes are stored in private R2. D1 stores the event slug, opaque UUID/object key, original filename, MIME type, size, moderation state, timestamp, optional RSVP association, and a one-way upload fingerprint. Pending and removed photos are available only through authenticated host endpoints. Public gallery queries select approved metadata only, and public image URLs proxy an opaque UUID rather than expose an R2 key. The application does not currently strip EXIF metadata or scan files for malware; approve only expected family photos.
+
+### Retention and removal
+
+There is no automatic retention policy. The family host should choose and document a retention period per event. A reasonable personal-use default is: retain RSVP data through planning and the event, export a host copy if needed, then delete responses no longer needed; retain approved keepsake photos intentionally and permanently delete rejected or unwanted photos.
+
+- Delete one RSVP using **Delete RSVP** in the authenticated dashboard. This permanently removes its D1 row after confirmation.
+- Remove a photo from the gallery with **Remove**; permanently remove its D1 metadata and R2 object with **Delete permanently** after confirmation.
+- Never empty a production bucket or restore D1 without reviewing the exact target and obtaining approval. Individual R2 objects can also be removed in Cloudflare’s R2 dashboard if the application action fails.
+
+### Backup, migration, and rollback
+
+Before a production migration, export D1 to a private local file outside the repository:
+
+```sh
+npx wrangler@latest d1 export made-to-gather-rsvps --remote --config wrangler.local.jsonc --output=/PRIVATE/SAFE/PATH/made-to-gather-backup.sql
+npx wrangler@latest d1 migrations list made-to-gather-rsvps --remote --config wrangler.local.jsonc
+npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote --config wrangler.local.jsonc
+```
+
+The export can contain names, phone numbers and messages: never commit it. D1 Time Travel is available for supported databases, but restoring changes production data and requires explicit approval. Application rollback uses a reviewed Git revert/redeployment. Database migrations have no automatic down migration, and `0005` rebuilds the RSVP table while preserving rows; roll back code first, then decide separately whether data restoration is necessary.
+
+Confirm these Cloudflare settings manually before real use:
+
+1. Production and preview Pages environments bind `DB` to the intended D1 database and `PHOTOS` to the intended private R2 bucket.
+2. `TEAM_DOMAIN` and `POLICY_AUD` are correct encrypted/controlled production values; `HOST_AUTH_DISABLED` is absent or `false` in production.
+3. R2 has no public development URL or custom public domain.
+4. Upload tokens are encrypted secrets, at least 24 random characters, and unique per event.
+5. Add a conservative Cloudflare rate-limiting rule or Turnstile before sharing broadly. The application has upload-token/IP limits and RSVP idempotency, but no production edge rate limit for newly generated RSVP identifiers.
+6. Review Cloudflare request-log retention because legacy query-token URLs may have been recorded.
+
+Run `npm run verify:security` for same-origin deletion, upload-token rejection, and approved-gallery checks. Run `npm run build` to scan guest output for host-only data and token environment names.
 
 ## Deploy through GitHub and Cloudflare Pages
 

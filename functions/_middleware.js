@@ -2,7 +2,11 @@ import { getLifecycle } from './lib/lifecycle.js';
 
 const eventHeaders = {
   'Cache-Control': 'private, no-store',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
   'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
   'X-Robots-Tag': 'noindex, nofollow, noarchive',
 };
 

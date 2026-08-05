@@ -5,7 +5,7 @@
   "compatibility_date": "2026-08-04",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
-    "HOST_AUTH_DISABLED": "true",
+    "HOST_AUTH_DISABLED": "false",
     "TEAM_DOMAIN": "https://REPLACE_WITH_YOUR_TEAM_NAME.cloudflareaccess.com",
     "POLICY_AUD": "REPLACE_WITH_YOUR_ACCESS_APPLICATION_AUD"
   },

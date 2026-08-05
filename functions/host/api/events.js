@@ -1,5 +1,6 @@
 import { events, getEventBySlug } from '../../../src/data/events.ts';
 import { EVENT_STATUSES, getLifecycle, lifecycleJson } from '../../lib/lifecycle.js';
+import { mutationRequestError } from '../../lib/request-security.js';
 
 function eventDate(event) {
   return `${event.date.weekday}, ${event.date.monthDay}, ${event.date.year}`;
@@ -39,8 +40,8 @@ export async function onRequest(context) {
   }
 
   if (context.request.method !== 'POST') return lifecycleJson({ ok: false, message: 'Method not allowed.' }, 405);
-  const origin = context.request.headers.get('Origin');
-  if (origin && origin !== new URL(context.request.url).origin) return lifecycleJson({ ok: false, message: 'Cross-origin updates are not accepted.' }, 403);
+  const requestError = mutationRequestError(context.request);
+  if (requestError) return lifecycleJson({ ok:false, message:requestError }, 403);
   const body = await context.request.json().catch(() => null);
   const event = getEventBySlug(body?.eventSlug);
   if (!event || !EVENT_STATUSES.has(body?.status) || typeof body.rsvpOpen !== 'boolean' || typeof body.photoUploadsOpen !== 'boolean') {

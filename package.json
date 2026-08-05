@@ -6,14 +6,16 @@
   "scripts": {
     "dev": "astro dev",
     "dev:cloudflare": "npm run build && npx wrangler@latest pages dev dist --config wrangler.local.jsonc --port 8788",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && node scripts/verify-public-output.mjs",
     "db:migrate:local": "npx wrangler@latest d1 migrations apply made-to-gather-rsvps --local --config wrangler.local.jsonc",
     "preview": "astro preview",
     "verify:host-auth": "node scripts/verify-host-auth.mjs",
     "verify:lifecycle": "node scripts/verify-lifecycle.mjs",
+    "verify:events": "node scripts/validate-events.mjs",
     "verify:messaging": "node scripts/verify-messaging.mjs",
     "verify:photos": "node scripts/verify-photos.mjs",
     "verify:rsvp": "node scripts/verify-rsvp.mjs",
+    "verify:security": "node scripts/verify-security.mjs",
     "astro": "astro"
   },
   "dependencies": {

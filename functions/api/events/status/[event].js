@@ -1,4 +1,4 @@
-import { getLifecycle, lifecycleJson, publicLifecycle } from '../../../../lib/lifecycle.js';
+import { getLifecycle, lifecycleJson, publicLifecycle } from '../../../lib/lifecycle.js';
 
 export async function onRequest(context) {
   if (context.request.method !== 'GET') return lifecycleJson({ ok: false, message: 'Method not allowed.' }, 405);

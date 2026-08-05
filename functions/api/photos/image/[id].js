@@ -6,5 +6,5 @@ export async function onRequest(context) {
   if (!photo) return new Response('Not found', { status: 404, headers: photoHeaders });
   const object = await context.env.PHOTOS.get(photo.object_key);
   if (!object) return new Response('Not found', { status: 404, headers: photoHeaders });
-  return new Response(object.body, { headers: { 'Cache-Control': 'private, no-store', 'Content-Type': photo.mime_type, 'Content-Disposition': 'inline', 'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex, nofollow, noarchive' } });
+  return new Response(object.body, { headers: { 'Cache-Control': 'private, no-store', 'Content-Type': photo.mime_type, 'Content-Disposition': 'inline', 'Cross-Origin-Resource-Policy':'same-origin', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options':'DENY', 'X-Robots-Tag': 'noindex, nofollow, noarchive' } });
 }

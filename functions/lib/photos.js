@@ -11,10 +11,12 @@ export const PHOTO_TYPES = new Map([
 
 export const photoHeaders = {
   'Cache-Control': 'no-store',
+  'Cross-Origin-Resource-Policy': 'same-origin',
   'Content-Type': 'application/json; charset=utf-8',
   'Referrer-Policy': 'no-referrer',
   'X-Content-Type-Options': 'nosniff',
   'X-Robots-Tag': 'noindex, nofollow, noarchive',
+  'X-Frame-Options': 'DENY',
 };
 
 export function photoJson(body, status = 200) {

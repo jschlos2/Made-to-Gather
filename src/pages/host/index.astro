@@ -12,7 +12,6 @@ import HostEvents from '../../components/HostEvents.astro';
   themeClass="host-page"
 >
   <main class="host-dashboard">
-    <HostEvents />
     <header class="host-header">
       <div>
         <p class="host-kicker">Private host view</p>
@@ -21,6 +20,7 @@ import HostEvents from '../../components/HostEvents.astro';
       </div>
       <a class="host-export" data-csv-link href="/host/api/rsvps?format=csv">Export CSV</a>
     </header>
+    <HostEvents />
 
     <form class="host-controls" data-dashboard-controls>
       <label>
@@ -123,29 +123,41 @@ import HostEvents from '../../components/HostEvents.astro';
 
   function contactCell(rsvp: Record<string, unknown>): HTMLTableCellElement {
     const element = document.createElement('td');
-    if (typeof rsvp.sms_uri !== 'string' || typeof rsvp.text_message !== 'string') {
-      element.textContent = 'No mobile number';
-      return element;
-    }
     const actions = document.createElement('div');
     actions.className = 'host-contact-actions';
-    const textLink = document.createElement('a');
-    textLink.href = rsvp.sms_uri;
-    textLink.textContent = 'Text guest';
-    textLink.setAttribute('aria-label', `Open a text message to ${String(rsvp.guest_name)}`);
-    const copyButton = document.createElement('button');
-    copyButton.type = 'button';
-    copyButton.textContent = 'Copy message';
-    copyButton.setAttribute('aria-label', `Copy text message for ${String(rsvp.guest_name)}`);
     const feedback = document.createElement('span');
     feedback.className = 'host-copy-feedback';
     feedback.setAttribute('role', 'status');
     feedback.setAttribute('aria-live', 'polite');
-    copyButton.addEventListener('click', async () => {
-      const copied = await copyMessage(String(rsvp.text_message));
-      feedback.textContent = copied ? 'Message copied.' : 'Copy is unavailable. Open Text guest and copy from the draft.';
+    if (typeof rsvp.sms_uri === 'string' && typeof rsvp.text_message === 'string') {
+      const textLink = document.createElement('a');
+      textLink.href = rsvp.sms_uri;
+      textLink.textContent = 'Text guest';
+      textLink.setAttribute('aria-label', `Open a text message to ${String(rsvp.guest_name)}`);
+      const copyButton = document.createElement('button');
+      copyButton.type = 'button';
+      copyButton.textContent = 'Copy message';
+      copyButton.setAttribute('aria-label', `Copy text message for ${String(rsvp.guest_name)}`);
+      copyButton.addEventListener('click', async () => {
+        const copied = await copyMessage(String(rsvp.text_message));
+        feedback.textContent = copied ? 'Message copied.' : 'Copy is unavailable. Open Text guest and copy from the draft.';
+      });
+      actions.append(textLink, copyButton);
+    } else {
+      actions.append(document.createTextNode('No mobile number'));
+    }
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.textContent = 'Delete RSVP';
+    deleteButton.setAttribute('aria-label', `Permanently delete RSVP for ${String(rsvp.guest_name)}`);
+    deleteButton.addEventListener('click', async () => {
+      if (!confirm(`Permanently delete the RSVP for ${String(rsvp.guest_name)}? This cannot be undone.`)) return;
+      deleteButton.disabled = true;
+      const response = await fetch(`/host/api/rsvps/${String(rsvp.id)}`, { method:'DELETE', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ confirm:'DELETE' }) });
+      if (response.ok) await loadResponses();
+      else { feedback.textContent = 'The RSVP could not be deleted.'; deleteButton.disabled = false; }
     });
-    actions.append(textLink, copyButton, feedback);
+    actions.append(deleteButton, feedback);
     element.append(actions);
     return element;
   }
