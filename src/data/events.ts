@@ -51,8 +51,8 @@ export const events: InvitationEvent[] = [
       height: 1095,
     },
     date: { weekday: 'Saturday', monthDay: 'August 29', year: '2026' },
-    time: '2–6 PM',
-    calendar: { start: '20260829T140000', end: '20260829T180000', timeZone: 'America/Los_Angeles' },
+    time: '12–4 PM',
+    calendar: { start: '20260829T120000', end: '20260829T160000', timeZone: 'America/Los_Angeles' },
     location: {
       name: 'The Robertson Home',
       address: '10485 NW Green View Ln',
