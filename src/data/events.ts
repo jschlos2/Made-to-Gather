@@ -63,7 +63,6 @@ export const events: InvitationEvent[] = [
       { label: 'Where', text: '10485 NW Green View Ln' },
       { label: 'Bring', text: 'Swimsuit and a towel' },
       { label: 'Food', text: 'Walking tacos, cool drinks, and sweet treats' },
-      { label: 'Parking', text: 'Please park along Green View Lane and leave driveways clear' },
     ],
     rsvpDeadline: 'August 20',
     hosts: 'The Robertson Family',
