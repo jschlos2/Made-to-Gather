@@ -54,7 +54,7 @@ export const events: InvitationEvent[] = [
     time: '12–4 PM',
     calendar: { start: '20260829T120000', end: '20260829T160000', timeZone: 'America/Los_Angeles' },
     location: {
-      name: 'The Robertson Home',
+     
       address: '10485 NW Green View Ln',
       mapUrl: 'https://maps.google.com/?q=10485+NW+Green+View+Ln',
     },
