@@ -54,10 +54,10 @@ export const events: InvitationEvent[] = [
     time: '12–4 PM',
     calendar: { start: '20260829T120000', end: '20260829T160000', timeZone: 'America/Los_Angeles' },
     location: {
-     
-      address: '10485 NW Green View Ln',
-      mapUrl: 'https://maps.google.com/?q=10485+NW+Green+View+Ln',
-    },
+  name: 'Private Residence',
+  address: '10485 NW Green View Ln',
+  mapUrl: 'https://maps.google.com/?q=10485+NW+Green+View+Ln',
+},
     description: ['Come celebrate Jennifer’s graduation with drinks, walking tacos, and a slip ’n slide.'],
     details: [
       { label: 'Where', text: '10485 NW Green View Ln' },
