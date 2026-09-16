@@ -73,7 +73,7 @@ export function validateEvent(event: InvitationEvent): string[] {
   required(event.internalId, 'internalId', errors); required(event.slug, 'slug', errors);
   required(event.hostFacingName, 'hostFacingName', errors); required(event.title, 'title', errors);
   required(event.subtitle, 'subtitle', errors); required(event.time, 'time', errors);
-  required(event.calendar.timeZone, 'calendar.timeZone', errors); required(event.location.name, 'location.name', errors);
+  required(event.calendar.timeZone, 'calendar.timeZone', errors); required(event.location.address, 'location.address', errors);
   required(event.rsvpDeadline, 'rsvpDeadline', errors); required(event.artwork.src, 'artwork.src', errors);
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(event.internalId)) errors.push('internalId must use lowercase letters, numbers, and hyphens.');
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(event.slug)) errors.push('slug must be URL-safe lowercase kebab-case.');

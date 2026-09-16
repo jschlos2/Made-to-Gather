@@ -288,6 +288,18 @@ footer a { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.0
   font-weight: 400;
   letter-spacing: .01em;
 }
+.theme-birthday .rsvp__confirmation h3 {
+  max-width: 38rem;
+  margin: 0 auto 1.75rem;
+  font-size: clamp(2rem, 7vw, 3.15rem);
+  letter-spacing: 0;
+  line-height: 1.08;
+  text-wrap: balance;
+  transform: none;
+}
+.theme-birthday .confirmation__copy {
+  padding-top: clamp(2.5rem, 8vw, 4.5rem);
+}
 .theme-birthday .confirmation__garden {
   position: relative;
   display: grid;

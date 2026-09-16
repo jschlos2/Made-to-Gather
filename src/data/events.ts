@@ -163,7 +163,7 @@ export const events: InvitationEvent[] = [
     },
 
     location: {
-      name: 'The Birthday Celebration',
+      name: '',
       address: '12819 NW Lorraine Dr, Portland',
       mapUrl: 'https://maps.google.com/?q=12819+NW+Lorraine+Dr+Portland',
     },

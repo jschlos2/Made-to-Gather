@@ -8,7 +8,7 @@ const calendarParameters = event.calendar.start && event.calendar.end ? new URLS
   dates: `${event.calendar.start}/${event.calendar.end}`,
   ctz: event.calendar.timeZone,
   details: event.description.join(' '),
-  location: `${event.location.name}, ${event.location.address}`,
+  location: [event.location.name, event.location.address].filter(Boolean).join(', '),
 }) : null;
 const calendarUrl = calendarParameters ? `https://calendar.google.com/calendar/render?${calendarParameters.toString()}` : null;
 const archedRsvpHeading = event.theme.name === 'theme-birthday';
@@ -17,7 +17,7 @@ const confirmationCurveId = `confirmation-curve-${event.slug}`;
 ---
 
 <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
-  <div class="rsvp__intro">
+  <div class="rsvp__intro" data-rsvp-intro>
     <h2 id="rsvp-title" class:list={{ 'rsvp__arched-title': archedRsvpHeading }}>
       {archedRsvpHeading ? (
         <>
@@ -101,7 +101,7 @@ const confirmationCurveId = `confirmation-curve-${event.slug}`;
         <div><dt>Response</dt><dd data-confirmation-status>Attending</dd></div>
         <div><dt>Guests</dt><dd data-confirmation-party>1 adult, 0 children</dd></div>
         <div><dt>Date and time</dt><dd>{event.date.weekday}, {event.date.monthDay}, {event.date.year} · {event.time}</dd></div>
-        <div><dt>Location</dt><dd>{event.location.name}<br />{event.location.address}</dd></div>
+        <div><dt>Location</dt><dd>{event.location.name && <>{event.location.name}<br /></>}{event.location.address}</dd></div>
       </dl>
       <div class="confirmation__actions">
         {calendarUrl && <a href={calendarUrl} target="_blank" rel="noopener noreferrer">Add to Calendar<span class="visually-hidden"> (opens in a new tab)</span></a>}
@@ -138,6 +138,7 @@ const confirmationCurveId = `confirmation-curve-${event.slug}`;
 
 <script>
   const form = document.querySelector<HTMLFormElement>('[data-rsvp-form]');
+  const rsvpIntro = document.querySelector<HTMLElement>('[data-rsvp-intro]');
   const confirmation = document.querySelector<HTMLElement>('[data-confirmation]');
   const confirmationStatus = document.querySelector<HTMLElement>('[data-confirmation-status]');
   const confirmationParty = document.querySelector<HTMLElement>('[data-confirmation-party]');
@@ -204,6 +205,7 @@ const confirmationCurveId = `confirmation-curve-${event.slug}`;
       if (signoff) signoff.textContent = signoffText;
       if (signoffCurve) signoffCurve.textContent = signoffText;
       garden?.classList.toggle('confirmation__garden--declined', !isAttending);
+      if (rsvpIntro) rsvpIntro.hidden = true;
       form.hidden = true;
       confirmation.hidden = false;
       confirmation.focus();
@@ -241,6 +243,7 @@ const confirmationCurveId = `confirmation-curve-${event.slug}`;
   editButton?.addEventListener('click', () => {
     if (!form || !confirmation) return;
     confirmation.hidden = true;
+    if (rsvpIntro) rsvpIntro.hidden = false;
     form.hidden = false;
     form.reset();
     delete form.dataset.submissionId;
