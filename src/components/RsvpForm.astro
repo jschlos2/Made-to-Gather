@@ -13,6 +13,7 @@ const calendarParameters = event.calendar.start && event.calendar.end ? new URLS
 const calendarUrl = calendarParameters ? `https://calendar.google.com/calendar/render?${calendarParameters.toString()}` : null;
 const archedRsvpHeading = event.theme.name === 'theme-birthday';
 const rsvpCurveId = `rsvp-curve-${event.slug}`;
+const confirmationCurveId = `confirmation-curve-${event.slug}`;
 ---
 
 <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
@@ -108,11 +109,27 @@ const rsvpCurveId = `rsvp-curve-${event.slug}`;
       </div>
     </div>
     <div class="confirmation__garden" data-confirmation-garden>
-      <p data-signoff>See you there!</p>
-      <div class="flowers" aria-hidden="true">
-        <img class="flowers__art" src="/artwork/flowers.png" alt="" width="1728" height="1728" decoding="async" />
-        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
+      {archedRsvpHeading ? (
+        <p class="confirmation__arched-signoff">
+          <span class="visually-hidden" data-signoff-text>See you there!</span>
+          <svg aria-hidden="true" viewBox="0 0 390 112" preserveAspectRatio="xMidYMid meet">
+            <path id={confirmationCurveId} d="M 20 96 Q 195 2 370 96" fill="none" />
+            <text>
+              <textPath data-signoff-curve href={`#${confirmationCurveId}`} startOffset="50%" text-anchor="middle" textLength="300" lengthAdjust="spacingAndGlyphs">See you there!</textPath>
+            </text>
+          </svg>
+        </p>
+      ) : <p data-signoff-text>See you there!</p>}
+      {archedRsvpHeading ? (
+        <div class="confirmation__pretzels" aria-hidden="true">
+          {Array.from({ length: 8 }).map(() => <img src="/events/theo-first-birthday/pretzel.png" alt="" width="89" height="77" decoding="async" />)}
+        </div>
+      ) : (
+        <div class="flowers" aria-hidden="true">
+          <img class="flowers__art" src="/artwork/flowers.png" alt="" width="1728" height="1728" decoding="async" />
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+      )}
     </div>
     <p class="confirmation__aside">Another guest may use this device to send a separate response.</p>
     <button class="text-button" type="button" data-edit-response>Submit another RSVP</button>
@@ -124,7 +141,8 @@ const rsvpCurveId = `rsvp-curve-${event.slug}`;
   const confirmation = document.querySelector<HTMLElement>('[data-confirmation]');
   const confirmationStatus = document.querySelector<HTMLElement>('[data-confirmation-status]');
   const confirmationParty = document.querySelector<HTMLElement>('[data-confirmation-party]');
-  const signoff = document.querySelector<HTMLElement>('[data-signoff]');
+  const signoff = document.querySelector<HTMLElement>('[data-signoff-text]');
+  const signoffCurve = document.querySelector<SVGTextPathElement>('[data-signoff-curve]');
   const garden = document.querySelector<HTMLElement>('[data-confirmation-garden]');
   const editButton = document.querySelector<HTMLButtonElement>('[data-edit-response]');
   const submitButton = document.querySelector<HTMLButtonElement>('[data-submit-button]');
@@ -182,7 +200,9 @@ const rsvpCurveId = `rsvp-curve-${event.slug}`;
       if (confirmationParty) confirmationParty.textContent = isAttending
         ? `${adults} adult${adults === 1 ? '' : 's'}, ${children} ${children === 1 ? 'child' : 'children'}`
         : '0 adults, 0 children';
-      if (signoff) signoff.textContent = isAttending ? 'See you there!' : 'See you next time!';
+      const signoffText = isAttending ? 'See you there!' : 'See you next time!';
+      if (signoff) signoff.textContent = signoffText;
+      if (signoffCurve) signoffCurve.textContent = signoffText;
       garden?.classList.toggle('confirmation__garden--declined', !isAttending);
       form.hidden = true;
       confirmation.hidden = false;

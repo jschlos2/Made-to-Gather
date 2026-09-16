@@ -288,6 +288,49 @@ footer a { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.0
   font-weight: 400;
   letter-spacing: .01em;
 }
+.theme-birthday .confirmation__garden {
+  position: relative;
+  display: grid;
+  min-height: 20rem;
+  padding: 3.25rem 1rem;
+  place-items: center;
+}
+.theme-birthday .confirmation__garden::before,
+.theme-birthday .confirmation__garden::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 27px;
+  background-image: url('/events/theo-first-birthday/diamond-border.png');
+  background-position: center;
+  background-repeat: repeat-x;
+  background-size: auto 27px;
+  content: '';
+}
+.theme-birthday .confirmation__garden::before { top: 0; }
+.theme-birthday .confirmation__garden::after { bottom: 0; }
+.theme-birthday .confirmation__garden > .confirmation__arched-signoff {
+  width: min(100%, 30rem);
+  margin: 0;
+  transform: none;
+}
+.theme-birthday .confirmation__arched-signoff svg { display: block; width: 100%; height: auto; overflow: visible; }
+.theme-birthday .confirmation__arched-signoff text {
+  fill: var(--color-white);
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 400;
+}
+.theme-birthday .confirmation__pretzels {
+  display: grid;
+  width: min(100%, 38rem);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem 2rem;
+  align-items: center;
+}
+.theme-birthday .confirmation__pretzels img { width: clamp(2.25rem, 8vw, 3.4rem); height: auto; margin: auto; }
+.theme-birthday .confirmation__pretzels img:nth-child(2n) { transform: translateY(.8rem) rotate(8deg); }
+.theme-birthday .confirmation__pretzels img:nth-child(3n) { transform: translateY(-.45rem) rotate(-7deg); }
 .button-pill .ticket-button { border-radius: 999px; }
 .theme-birthday .ticket-button::before,
 .theme-birthday .ticket-button::after { display: none; }
