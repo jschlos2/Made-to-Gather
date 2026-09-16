@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import InvitationPage from '../../components/InvitationPage.astro';
 import { events, getThemeClasses, getThemeStyle, type InvitationEvent } from '../../data/events';
 
-export const getStaticPaths = (() => events.map((event) => ({
+export const getStaticPaths = (() => events.filter((event) => event.lifecycle.status !== 'draft').map((event) => ({
   params: { slug: event.slug },
   props: { event },
 }))) satisfies GetStaticPaths;

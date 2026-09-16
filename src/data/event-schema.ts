@@ -5,7 +5,7 @@ export type IndexingPreference = 'noindex';
 export interface EventDetail { label: string; text: string }
 export interface EventLink { label: string; href: string }
 export interface EventArtwork { src: string; alt: string; width: number; height: number }
-export interface EventAudio { src: string; title: string; autoplay?: boolean }
+export interface EventAudio { src: string; title: string; autoplay?: boolean; loop?: boolean }
 export interface EventTheme {
   name: string;
   decorativeClasses?: string[];

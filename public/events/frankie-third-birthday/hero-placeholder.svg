@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title description">
+  <title id="title">Frankie’s third birthday placeholder artwork</title>
+  <desc id="description">A warm cream invitation placeholder with colorful balloons and the number three.</desc>
+  <rect width="1200" height="900" fill="#f7efe5"/>
+  <rect x="34" y="34" width="1132" height="832" rx="24" fill="none" stroke="#344b63" stroke-width="8"/>
+  <g fill="none" stroke="#344b63" stroke-width="5" opacity=".8">
+    <path d="M170 286c-54 96-29 198 72 305"/>
+    <path d="M1030 286c54 96 29 198-72 305"/>
+  </g>
+  <g>
+    <ellipse cx="165" cy="220" rx="82" ry="104" fill="#c86772"/>
+    <path d="m165 324-15 27h30z" fill="#c86772"/>
+    <ellipse cx="1035" cy="220" rx="82" ry="104" fill="#76917b"/>
+    <path d="m1035 324-15 27h30z" fill="#76917b"/>
+  </g>
+  <text x="600" y="190" fill="#344b63" font-family="Georgia, serif" font-size="42" text-anchor="middle" letter-spacing="8">SAVE THE MONTH</text>
+  <text x="600" y="500" fill="#b75361" font-family="Georgia, serif" font-size="330" font-weight="700" text-anchor="middle">3</text>
+  <text x="600" y="625" fill="#344b63" font-family="Georgia, serif" font-size="78" font-weight="700" text-anchor="middle">FRANKIE’S BIRTHDAY</text>
+  <text x="600" y="710" fill="#52667a" font-family="Arial, sans-serif" font-size="42" text-anchor="middle" letter-spacing="6">JANUARY 2027</text>
+  <text x="600" y="785" fill="#52667a" font-family="Arial, sans-serif" font-size="26" text-anchor="middle" letter-spacing="4">PLACEHOLDER · DETAILS TBD</text>
+</svg>

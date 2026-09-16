@@ -49,6 +49,30 @@ const birthdayTheme: EventTheme = {
   },
 };
 
+const frankieBirthdayTheme: EventTheme = {
+  name: 'theme-frankie-birthday',
+  decorativeClasses: ['birthday-three', 'placeholder-artwork'],
+  buttonStyle: 'pill',
+  backgroundTreatment: 'plain',
+  colors: {
+    paper: '#f7efe5',
+    paperDeep: '#e7d6c4',
+    ink: '#344b63',
+    inkSoft: '#52667a',
+    accent: '#c86772',
+    action: '#b75361',
+    panel: '#76917b',
+    panelDeep: '#526c59',
+    light: '#fffaf4',
+    surround: '#d9cbbc',
+  },
+  fonts: {
+    display: "Georgia, 'Times New Roman', serif",
+    body: "'Avenir Next', Avenir, sans-serif",
+    label: "'Avenir Next', Avenir, sans-serif",
+  },
+};
+
 export const events: InvitationEvent[] = [
   defineEvent({
     internalId: 'jennifer-graduation-2026',
@@ -146,6 +170,7 @@ export const events: InvitationEvent[] = [
       src: '/events/theo-first-birthday/oktoberfest-party.mp3',
       title: 'Oktoberfest party music',
       autoplay: true,
+      loop: true,
     },
 
     date: {
@@ -212,6 +237,82 @@ export const events: InvitationEvent[] = [
     },
 
     theme: birthdayTheme,
+  }),
+
+  defineEvent({
+    internalId: 'frankie-third-birthday-2027',
+    slug: 'frankie-third-birthday',
+    privateShareTokenEnv: 'EVENT_SHARE_TOKEN_FRANKIE_THIRD_BIRTHDAY',
+    hostFacingName: 'Frankie’s third birthday — January 2027',
+    publishReviewComplete: false,
+    indexing: 'noindex',
+    eyebrow: 'Three cheers for Frankie',
+    title: 'Frankie’s Third Birthday',
+    subtitle: 'January 2027 · Details TBD',
+
+    artwork: {
+      src: '/events/frankie-third-birthday/hero-placeholder.svg',
+      alt: 'Placeholder artwork for Frankie’s third birthday invitation',
+      width: 1200,
+      height: 900,
+    },
+
+    date: {
+      weekday: 'January',
+      monthDay: 'Date TBD',
+      year: '2027',
+    },
+
+    time: 'Time TBD',
+
+    calendar: {
+      timeZone: 'America/Los_Angeles',
+    },
+
+    location: {
+      name: 'Location TBD',
+      address: 'Address TBD',
+    },
+
+    hostOnly: {
+      privateStreetAddress: 'HOST TO ADD BEFORE PUBLISHING',
+    },
+
+    description: [
+      'Birthday invitation details are being planned. Host to replace this placeholder copy before publishing.',
+    ],
+
+    details: [
+      { label: 'Where', text: 'TBD — host to edit' },
+      { label: 'Food', text: 'TBD — host to edit' },
+      { label: 'What to bring', text: 'TBD — host to edit' },
+    ],
+
+    rsvpDeadline: 'TBD — host to edit',
+    hosts: 'The Robertson Family',
+
+    rsvp: {
+      mobileRequired: true,
+      adultCount: { label: 'Adults attending', minimum: 0, maximum: 12, defaultValue: 1 },
+      childCount: { label: 'Children attending', minimum: 0, maximum: 12, defaultValue: 0 },
+      dietaryRestrictions: { label: 'Dietary restrictions', enabled: true },
+      message: { label: 'Optional note', enabled: true },
+    },
+
+    lifecycle: {
+      status: 'draft',
+      rsvpOpen: false,
+      photoUploadsOpen: false,
+      archiveSummary: 'Frankie’s third birthday — host to add a keepsake summary after the event.',
+    },
+
+    photos: {
+      uploadsEnabled: false,
+      galleryEnabled: false,
+      uploadTokenEnv: 'PHOTO_UPLOAD_TOKEN_FRANKIE_THIRD_BIRTHDAY',
+    },
+
+    theme: frankieBirthdayTheme,
   }),
 ];
 

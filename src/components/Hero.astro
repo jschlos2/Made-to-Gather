@@ -22,6 +22,7 @@ const { event } = Astro.props;
       <audio
         controls
         autoplay={event.audio.autoplay}
+        loop={event.audio.loop}
         preload={event.audio.autoplay ? 'auto' : 'none'}
         data-event-audio={event.audio.autoplay ? 'autoplay' : undefined}
         aria-label={`Play ${event.audio.title}`}
