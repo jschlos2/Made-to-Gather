@@ -7,9 +7,27 @@ interface Props {
   themeClass?: string;
   robots?: string;
   referrer?: string;
+  socialImage?: string;
+  socialImageAlt?: string;
+  socialImageWidth?: number;
+  socialImageHeight?: number;
 }
 
-const { title, description, themeColor = '#f3eddd', themeStyle, themeClass, robots, referrer } = Astro.props;
+const {
+  title,
+  description,
+  themeColor = '#f3eddd',
+  themeStyle,
+  themeClass,
+  robots,
+  referrer,
+  socialImage,
+  socialImageAlt,
+  socialImageWidth,
+  socialImageHeight,
+} = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const socialImageUrl = socialImage ? new URL(socialImage, Astro.site ?? Astro.url.origin) : null;
 import '../styles/global.css';
 ---
 
@@ -20,6 +38,20 @@ import '../styles/global.css';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="theme-color" content={themeColor} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    {socialImageUrl && <meta property="og:image" content={socialImageUrl} />}
+    {socialImageUrl && socialImageAlt && <meta property="og:image:alt" content={socialImageAlt} />}
+    {socialImageUrl && socialImageWidth && <meta property="og:image:width" content={String(socialImageWidth)} />}
+    {socialImageUrl && socialImageHeight && <meta property="og:image:height" content={String(socialImageHeight)} />}
+    <meta name="twitter:card" content={socialImageUrl ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {socialImageUrl && <meta name="twitter:image" content={socialImageUrl} />}
+    {socialImageUrl && socialImageAlt && <meta name="twitter:image:alt" content={socialImageAlt} />}
     {robots && <meta name="robots" content={robots} />}
     <meta name="referrer" content={referrer ?? 'strict-origin-when-cross-origin'} />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✽</text></svg>" />

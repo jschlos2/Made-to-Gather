@@ -22,6 +22,10 @@ const themeClass = getThemeClasses(event.theme);
   themeClass={themeClass}
   robots="noindex, nofollow, noarchive"
   referrer="strict-origin-when-cross-origin"
+  socialImage={event.artwork.src}
+  socialImageAlt={event.artwork.alt}
+  socialImageWidth={event.artwork.width}
+  socialImageHeight={event.artwork.height}
 >
   <InvitationPage event={event} />
 </BaseLayout>
