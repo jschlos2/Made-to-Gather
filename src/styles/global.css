@@ -293,6 +293,7 @@ footer a { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.0
   display: grid;
   min-height: 20rem;
   padding: 3.25rem 1rem;
+  border-top: 0;
   place-items: center;
 }
 .theme-birthday .confirmation__garden::before,
@@ -301,10 +302,15 @@ footer a { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.0
   right: 0;
   left: 0;
   height: 27px;
-  background-image: url('/events/theo-first-birthday/diamond-border.png');
-  background-position: center;
-  background-repeat: repeat-x;
-  background-size: auto 27px;
+  background-color: var(--color-white);
+  -webkit-mask-image: url('/events/theo-first-birthday/diamond-border.png');
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: repeat-x;
+  -webkit-mask-size: auto 27px;
+  mask-image: url('/events/theo-first-birthday/diamond-border.png');
+  mask-position: center;
+  mask-repeat: repeat-x;
+  mask-size: auto 27px;
   content: '';
 }
 .theme-birthday .confirmation__garden::before { top: 0; }
