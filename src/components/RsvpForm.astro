@@ -105,6 +105,7 @@ const confirmationCurveId = `confirmation-curve-${event.slug}`;
       </dl>
       <div class="confirmation__actions">
         {calendarUrl && <a href={calendarUrl} target="_blank" rel="noopener noreferrer">Add to Calendar<span class="visually-hidden"> (opens in a new tab)</span></a>}
+        {event.links?.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}<span class="visually-hidden"> (opens in a new tab)</span></a>)}
         <a href="#invitation-top">Return to Invitation</a>
       </div>
     </div>
