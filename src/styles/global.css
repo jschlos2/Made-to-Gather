@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Alfa Slab One';
+  src: url('/fonts/alfa-slab-one-regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Lora;
+  src: url('/fonts/lora-variable.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
 /* Put licensed .woff2 files in /public/fonts and replace these system fallbacks if desired. */
 :root {
   --color-paper: #f3eddd;
@@ -80,6 +96,8 @@ h1 {
 }
 .hero__subtitle { margin: 0.25rem auto 0; font-size: 0.72rem; font-style: italic; }
 .hero__rsvp-link { display: inline-block; margin-top: 0.65rem; font-family: var(--font-label); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.event-audio { width: min(100%, 20rem); margin: 1rem auto 0; }
+.event-audio audio { display: block; width: 100%; min-height: 44px; }
 
 .event-details { padding: 1.7rem 1.9rem 0; text-align: center; }
 .section-kicker {
@@ -115,6 +133,7 @@ h1 {
 .party-notes dt { font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppercase; }
 .party-notes dd { margin: 0; font-size: 1.02rem; }
 .map-link { display: inline-block; margin: 0.9rem 0 1.5rem; font-family: var(--font-label); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.event-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 1.5rem; }
 
 .rsvp { padding: 0 1.25rem 3rem; }
 .rsvp__intro { text-align: center; }
@@ -238,15 +257,42 @@ footer { padding: 1.5rem 1.25rem 2.5rem; border-top: 1px dashed rgba(22,71,90,.3
 footer p { margin-bottom: 0.5rem; }
 footer a { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 
-.theme-birthday .hero__poster { border-radius: 0.7rem; }
-.theme-birthday .hero__poster-wrap { box-shadow: 0 14px 32px rgba(89, 50, 71, 0.18); }
+.theme-birthday .hero__poster { aspect-ratio: 5 / 7; border-radius: 0; object-fit: contain; }
+.theme-birthday .hero__poster-wrap { max-width: 27rem; box-shadow: 0 14px 32px rgba(20, 91, 125, 0.18); }
 .theme-birthday .hero__subtitle { font-family: var(--font-display); font-size: 1rem; font-style: normal; }
-.theme-birthday .event-details h2 { font-family: var(--font-display); letter-spacing: -0.025em; text-transform: none; }
+.theme-birthday h1,
+.theme-birthday h2,
+.theme-birthday h3,
+.theme-birthday .section-kicker,
+.theme-birthday .event-details h2,
+.theme-birthday .party-notes dt,
+.theme-birthday .ticket-button { font-family: var(--font-display); font-weight: 400; }
+.theme-birthday .event-details h2 { letter-spacing: -0.015em; text-transform: none; }
+.theme-birthday .event-details__description p { margin-bottom: 0; }
+.theme-birthday .event-audio {
+  padding: .6rem .75rem .75rem;
+  border: 2px solid var(--color-ink);
+  background: var(--color-paper);
+}
+.theme-birthday .rsvp__intro .rsvp__arched-title {
+  width: min(100%, 30rem);
+  margin: 0 auto .25rem;
+  line-height: 1;
+  transform: none;
+}
+.theme-birthday .rsvp__arched-title svg { display: block; width: 100%; height: auto; overflow: visible; }
+.theme-birthday .rsvp__arched-title text {
+  fill: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 400;
+  letter-spacing: .01em;
+}
 .button-pill .ticket-button { border-radius: 999px; }
 .theme-birthday .ticket-button::before,
 .theme-birthday .ticket-button::after { display: none; }
 .theme-birthday .hero { padding-top: clamp(1.5rem, 7vw, 3.5rem); }
-.theme-birthday .hero__poster-wrap { border: 4px solid var(--color-light, var(--color-white)); }
+.theme-birthday .hero__poster-wrap { border: 2px solid var(--color-ink); background: var(--color-paper); }
 .theme-birthday .party-notes { border-block: 6px double color-mix(in srgb, var(--color-white), transparent 25%); }
 
 .theme-graduation .hero h1,

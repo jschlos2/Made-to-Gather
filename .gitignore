@@ -3,6 +3,7 @@ dist/
 .astro/
 .wrangler/
 wrangler.local.jsonc
+wrangler.jsonc
 .dev.vars
 .env
 .env.*

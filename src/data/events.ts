@@ -27,25 +27,25 @@ const graduationTheme: EventTheme = {
 
 const birthdayTheme: EventTheme = {
   name: 'theme-birthday',
-  decorativeClasses: ['birthday-one', 'playful-balloons'],
-  buttonStyle: 'pill',
-  backgroundTreatment: 'birthday-sprinkles',
+  decorativeClasses: ['birthday-one', 'oktoberfest'],
+  buttonStyle: 'ticket',
+  backgroundTreatment: 'paper-grain',
   colors: {
-    paper: '#fff4dc',
-    paperDeep: '#f4c7c3',
-    ink: '#593247',
-    inkSoft: '#754d61',
-    accent: '#c84f59',
-    action: '#7d3e54',
-    panel: '#456f6b',
-    panelDeep: '#345a56',
-    light: '#fffaf2',
-    surround: '#dfbbb8',
+    paper: '#fbf1d4',
+    paperDeep: '#ead9ad',
+    ink: '#0f648b',
+    inkSoft: '#244f5f',
+    accent: '#e7ae20',
+    action: '#0f6b94',
+    panel: '#176f96',
+    panelDeep: '#0f5879',
+    light: '#fff9e8',
+    surround: '#d5c295',
   },
   fonts: {
-    display: "'Cooper Black', 'Rockwell Extra Bold', Georgia, serif",
-    body: "'Trebuchet MS', 'Avenir Next', sans-serif",
-    label: "'Trebuchet MS', 'Avenir Next', sans-serif",
+    display: "'Alfa Slab One', Rockwell, serif",
+    body: "Lora, Georgia, serif",
+    label: "Lora, Georgia, serif",
   },
 };
 
@@ -130,65 +130,76 @@ export const events: InvitationEvent[] = [
     internalId: 'theo-first-birthday-2026',
     slug: 'theo-first-birthday',
     hostFacingName: 'Theo’s first birthday — October 2026',
-    publishReviewComplete: false,
-    eyebrow: 'First birthday · Details to come',
+    publishReviewComplete: true,
+    eyebrow: 'Prost to one year!',
     title: 'Theo’s First Birthday',
-    subtitle: 'Invitation headline — host to edit',
+    subtitle: 'Birthtoberfest',
 
     artwork: {
-      src: '/artwork/birthday-balloons.png',
-      alt: 'Placeholder artwork with colorful coral, gold, teal, and lavender balloons',
-      width: 1400,
-      height: 1095,
+      src: '/events/theo-first-birthday/hero.jpg',
+      alt: 'Theo’s first Birthtoberfest invitation featuring a stein, pretzel, blue diamonds, and alpine flowers',
+      width: 1200,
+      height: 1680,
+    },
+
+    audio: {
+      src: '/events/theo-first-birthday/oktoberfest-party.mp3',
+      title: 'Oktoberfest party music',
+      autoplay: true,
     },
 
     date: {
-      weekday: 'October',
-      monthDay: 'Date TBD',
+      weekday: 'Saturday',
+      monthDay: 'October 17',
       year: '2026',
     },
 
-    time: 'Time TBD',
+    time: '1–5:30 PM',
 
     calendar: {
+      start: '20261017T130000',
+      end: '20261017T173000',
       timeZone: 'America/Los_Angeles',
     },
 
     location: {
-      name: 'Location TBD',
-      address: 'Host to add venue and address',
+      name: 'The Birthday Celebration',
+      address: '12819 NW Lorraine Dr, Portland',
+      mapUrl: 'https://maps.google.com/?q=12819+NW+Lorraine+Dr+Portland',
     },
 
     description: [
-      'Birthday description placeholder — host to edit before sharing this invitation.',
+      'Raise a stein and shout hooray,',
+      'Theo is ONE on this special day!',
+      'With pretzels, pints and plenty of cheer,',
+      'come help us toast his very first year.',
     ],
 
     details: [
       {
-        label: 'Location',
-        text: 'TBD — host to add venue details',
-      },
-      {
-        label: 'Parking',
-        text: 'TBD — host to add parking instructions',
+        label: 'Where',
+        text: '12819 NW Lorraine Dr, Portland',
       },
       {
         label: 'Food',
-        text: 'TBD — host to add food details',
-      },
-      {
-        label: 'What to bring',
-        text: 'TBD — host to add guest guidance',
+        text: 'Brats, pretzels and festive sips for all ages',
       },
     ],
 
-    rsvpDeadline: 'TBD — host to set deadline',
+    links: [
+      {
+        label: 'View Theo’s wishlist',
+        href: 'https://www.amazon.com/hz/wishlist/ls/2UULM6O60MDQM?ref_=wl_share',
+      },
+    ],
 
-    hosts: 'Host name — edit before sharing',
+    rsvpDeadline: 'October 10',
+
+    hosts: 'The Robertson’s',
 
     lifecycle: {
-      status: 'draft',
-      rsvpOpen: false,
+      status: 'rsvp_open',
+      rsvpOpen: true,
       photoUploadsOpen: false,
       archiveSummary:
         'Theo’s first birthday gathering — summary to be added after the event.',

@@ -3,7 +3,9 @@ export type EventStatus = typeof eventStatuses[number];
 export type IndexingPreference = 'noindex';
 
 export interface EventDetail { label: string; text: string }
+export interface EventLink { label: string; href: string }
 export interface EventArtwork { src: string; alt: string; width: number; height: number }
+export interface EventAudio { src: string; title: string; autoplay?: boolean }
 export interface EventTheme {
   name: string;
   decorativeClasses?: string[];
@@ -32,6 +34,7 @@ export interface InvitationEvent {
   title: string;
   subtitle: string;
   artwork: EventArtwork;
+  audio?: EventAudio;
   date: { weekday:string; monthDay:string; year:string };
   time: string;
   calendar: { start?:string; end?:string; timeZone:string };
@@ -39,6 +42,7 @@ export interface InvitationEvent {
   hostOnly?: { privateStreetAddress?:string };
   description: string[];
   details: EventDetail[];
+  links?: EventLink[];
   rsvpDeadline: string;
   hosts: string;
   rsvp: EventRsvp;
@@ -74,10 +78,12 @@ export function validateEvent(event: InvitationEvent): string[] {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(event.internalId)) errors.push('internalId must use lowercase letters, numbers, and hyphens.');
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(event.slug)) errors.push('slug must be URL-safe lowercase kebab-case.');
   if (!event.artwork.src.startsWith('/')) errors.push('artwork.src must be a root-relative public path.');
+  if (event.audio && (!event.audio.src.startsWith('/') || !event.audio.title.trim())) errors.push('audio must include a root-relative src and a title.');
   if (!event.artwork.alt.trim()) errors.push('artwork.alt is required.');
   if (!Number.isInteger(event.artwork.width) || event.artwork.width < 1 || !Number.isInteger(event.artwork.height) || event.artwork.height < 1) errors.push('artwork width and height must be positive integers.');
   if (!event.description.length || event.description.some((item) => !item.trim())) errors.push('description must contain at least one non-empty paragraph.');
   if (!event.details.length || event.details.some((item) => !item.label.trim() || !item.text.trim())) errors.push('details must contain labeled, non-empty sections.');
+  if (event.links?.some((link) => !link.label.trim() || !/^https:\/\//.test(link.href))) errors.push('links must include a label and an HTTPS URL.');
   if ((event.calendar.start && !event.calendar.end) || (!event.calendar.start && event.calendar.end)) errors.push('calendar.start and calendar.end must be provided together.');
   try { new Intl.DateTimeFormat('en-US', { timeZone:event.calendar.timeZone }).format(); } catch { errors.push('calendar.timeZone must be a valid IANA timezone.'); }
   if (event.lifecycle.status === 'draft' && event.lifecycle.rsvpOpen) errors.push('Draft events cannot have RSVPs open.');

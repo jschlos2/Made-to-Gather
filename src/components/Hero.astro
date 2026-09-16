@@ -17,5 +17,38 @@ const { event } = Astro.props;
   </div>
   <h1 id="event-title">{event.title}</h1>
   <p class="hero__subtitle">{event.subtitle}</p>
+  {event.audio && (
+    <section class="event-audio" aria-label="Event music">
+      <audio
+        controls
+        autoplay={event.audio.autoplay}
+        preload={event.audio.autoplay ? 'auto' : 'none'}
+        data-event-audio={event.audio.autoplay ? 'autoplay' : undefined}
+        aria-label={`Play ${event.audio.title}`}
+      >
+        <source src={event.audio.src} type="audio/mpeg" />
+        Your browser does not support embedded audio.
+      </audio>
+    </section>
+  )}
   <a class="hero__rsvp-link" href="#rsvp">RSVP below <span aria-hidden="true">↓</span></a>
 </header>
+
+{event.audio?.autoplay && (
+  <script>
+    const eventAudio = document.querySelector<HTMLAudioElement>('[data-event-audio="autoplay"]');
+    if (eventAudio) {
+      const beginPlayback = () => {
+        void eventAudio.play().catch(() => {});
+      };
+      beginPlayback();
+      const beginAfterInteraction = () => {
+        if (eventAudio.paused) beginPlayback();
+        document.removeEventListener('pointerdown', beginAfterInteraction);
+        document.removeEventListener('keydown', beginAfterInteraction);
+      };
+      document.addEventListener('pointerdown', beginAfterInteraction, { once: true });
+      document.addEventListener('keydown', beginAfterInteraction, { once: true });
+    }
+  </script>
+)}

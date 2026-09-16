@@ -11,11 +11,25 @@ const calendarParameters = event.calendar.start && event.calendar.end ? new URLS
   location: `${event.location.name}, ${event.location.address}`,
 }) : null;
 const calendarUrl = calendarParameters ? `https://calendar.google.com/calendar/render?${calendarParameters.toString()}` : null;
+const archedRsvpHeading = event.theme.name === 'theme-birthday';
+const rsvpCurveId = `rsvp-curve-${event.slug}`;
 ---
 
 <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
   <div class="rsvp__intro">
-    <h2 id="rsvp-title">Will you be there?</h2>
+    <h2 id="rsvp-title" class:list={{ 'rsvp__arched-title': archedRsvpHeading }}>
+      {archedRsvpHeading ? (
+        <>
+          <span class="visually-hidden">Will you be there?</span>
+          <svg aria-hidden="true" viewBox="0 0 390 105" preserveAspectRatio="xMidYMid meet">
+            <path id={rsvpCurveId} d="M 8 92 Q 195 0 382 92" fill="none" />
+            <text>
+              <textPath href={`#${rsvpCurveId}`} startOffset="50%" text-anchor="middle" textLength="340" lengthAdjust="spacingAndGlyphs">Will you be there?</textPath>
+            </text>
+          </svg>
+        </>
+      ) : 'Will you be there?'}
+    </h2>
     <p>Please reply by {event.rsvpDeadline}. Your response will be saved when you submit it.</p>
   </div>
 

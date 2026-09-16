@@ -175,10 +175,10 @@ Wrangler is invoked with `npx` so it is not included in the production applicati
 1. Create a local-only configuration and replace the database ID placeholder with the ID printed when the D1 database was created:
 
 ```sh
-cp wrangler.example.jsonc wrangler.local.jsonc
+cp wrangler.example.jsonc wrangler.jsonc
 ```
 
-`wrangler.local.jsonc` and `.wrangler/` are ignored by Git. Local commands below use local D1 storage and do not write to the remote database.
+`wrangler.jsonc` and `.wrangler/` are ignored by Git. Wrangler Pages requires the standard `wrangler.jsonc` filename. Local commands below use local D1 storage and do not write to the remote database.
 
 2. Apply the migration locally:
 
