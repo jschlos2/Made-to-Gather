@@ -22,6 +22,14 @@ import HostEvents from '../../components/HostEvents.astro';
     </header>
     <HostEvents />
 
+    <section class="host-rsvps" aria-labelledby="guest-list-title">
+    <header class="host-section-header">
+      <div>
+        <p class="host-kicker">Guest responses</p>
+        <h2 id="guest-list-title">Guest list</h2>
+      </div>
+    </header>
+
     <form class="host-controls" data-dashboard-controls>
       <label>
         Event
@@ -51,6 +59,7 @@ import HostEvents from '../../components/HostEvents.astro';
     <p class="host-status" data-host-status aria-live="polite">Loading responses…</p>
 
     <dl class="host-summary" aria-label="RSVP totals">
+      <div class="host-summary__total"><dt>Total attendees</dt><dd data-total="attendees">—</dd></div>
       <div><dt>Attending</dt><dd data-total="attending">—</dd></div>
       <div><dt>Unable to attend</dt><dd data-total="declines">—</dd></div>
       <div><dt>Adults</dt><dd data-total="adults">—</dd></div>
@@ -75,6 +84,7 @@ import HostEvents from '../../components/HostEvents.astro';
         <tbody data-rsvp-list></tbody>
       </table>
     </div>
+    </section>
     <HostPhotos />
   </main>
 </BaseLayout>
@@ -183,7 +193,7 @@ import HostEvents from '../../components/HostEvents.astro';
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.ok) throw new Error(result?.message || 'Responses could not be loaded.');
 
-      for (const name of ['attending', 'declines', 'adults', 'children']) {
+      for (const name of ['attendees', 'attending', 'declines', 'adults', 'children']) {
         const target = totals.get(name);
         if (target) target.textContent = String(result.summary?.[name] ?? 0);
       }
@@ -231,13 +241,18 @@ import HostEvents from '../../components/HostEvents.astro';
   .host-header p:last-child { margin: 0; }
   .host-export { display: inline-flex; min-height: 2.75rem; align-items: center; padding: .65rem 1rem; border: 1px solid var(--color-ink); background: var(--color-ink); color: var(--color-white); font-family: var(--font-label); font-weight: 800; letter-spacing: .05em; text-decoration: none; text-transform: uppercase; }
   .host-export:hover { transform: translateY(-1px); }
-  .host-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); margin: 1.5rem 0; gap: 1rem; }
+  .host-rsvps { padding-bottom: .5rem; }
+  .host-section-header { margin-bottom: 1.25rem; }
+  .host-section-header h2 { margin: 0; font: 700 clamp(2.2rem, 7vw, 4rem)/1 var(--font-display); text-transform: none; }
+  .host-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); margin: 0 0 1.25rem; gap: 1rem; }
   .host-controls label { display: grid; gap: .35rem; font-family: var(--font-label); font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
   .host-controls select { min-height: 2.75rem; padding: .45rem .65rem; border: var(--border); border-radius: var(--radius); background: var(--color-white); color: var(--color-ink); }
-  .host-status { min-height: 1.5rem; margin-bottom: 1rem; }
+  .host-status { min-height: 1.5rem; margin: 0 0 1rem; }
   .host-status--error { color: #8f2f24; font-weight: 700; }
   .host-summary { display: grid; grid-template-columns: repeat(2, 1fr); margin: 0 0 1.5rem; border-top: var(--border); border-left: var(--border); }
-  .host-summary div { padding: 1rem; border-right: var(--border); border-bottom: var(--border); }
+  .host-summary div { min-width: 0; padding: 1rem; border-right: var(--border); border-bottom: var(--border); }
+  .host-summary__total { background: var(--color-ink); color: var(--color-white); }
+  .host-summary .host-summary__total dd { color: var(--color-white); }
   .host-summary dt { font-family: var(--font-label); font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
   .host-summary dd { margin: .15rem 0 0; color: var(--color-coral); font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 800; }
   .host-table-wrap { overflow-x: auto; border: var(--border); background: rgba(255,255,255,.28); }
@@ -251,5 +266,5 @@ import HostEvents from '../../components/HostEvents.astro';
   .host-contact-actions a, .host-contact-actions button { padding: 0; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
   .host-copy-feedback { max-width: 13rem; font-size: .72rem; }
   .host-inline-action:focus-visible, .host-contact-actions a:focus-visible, .host-contact-actions button:focus-visible { outline: 3px solid var(--color-coral); outline-offset: 3px; }
-  @media (min-width: 48rem) { .host-summary { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 48rem) { .host-summary { grid-template-columns: repeat(5, 1fr); } }
 </style>

@@ -14,13 +14,15 @@ export async function onRequest(context) {
     if (requested && !selected.length) return lifecycleJson({ ok: false, message: 'Event not found.' }, 404);
     try {
       const [rsvpResult, photoResult] = await Promise.all([
-        context.env.DB.prepare('SELECT event_slug, COUNT(*) AS count FROM rsvps GROUP BY event_slug').all(),
+        context.env.DB.prepare(`SELECT event_slug, COUNT(*) AS count,
+          COALESCE(SUM(CASE WHEN attendance_status = 'attending' THEN adults + children ELSE 0 END), 0) AS attendees
+          FROM rsvps GROUP BY event_slug`).all(),
         context.env.DB.prepare(`SELECT event_slug,
           SUM(CASE WHEN moderation_status = 'approved' THEN 1 ELSE 0 END) AS approved,
           SUM(CASE WHEN moderation_status = 'pending' THEN 1 ELSE 0 END) AS pending
           FROM event_photos GROUP BY event_slug`).all().catch(() => ({ results: [] })),
       ]);
-      const rsvps = new Map((rsvpResult.results || []).map((row) => [row.event_slug, Number(row.count)]));
+      const rsvps = new Map((rsvpResult.results || []).map((row) => [row.event_slug, { count: Number(row.count), attendees: Number(row.attendees) }]));
       const photos = new Map((photoResult.results || []).map((row) => [row.event_slug, { approved: Number(row.approved), pending: Number(row.pending) }]));
       const output = await Promise.all(selected.map(async (event) => {
         const state = await getLifecycle(context.env, event.slug);
@@ -28,7 +30,8 @@ export async function onRequest(context) {
           slug: event.slug, title: event.title, date: eventDate(event), timeZone: event.calendar.timeZone,
           artwork: event.artwork, status: state.status, rsvpOpen: state.rsvpOpen,
           photoUploadsOpen: state.photoUploadsOpen, source: state.source,
-          rsvpCount: rsvps.get(event.slug) || 0,
+          rsvpCount: rsvps.get(event.slug)?.count || 0,
+          attendeeCount: rsvps.get(event.slug)?.attendees || 0,
           approvedPhotoCount: photos.get(event.slug)?.approved || 0,
           pendingPhotoCount: photos.get(event.slug)?.pending || 0,
         };
