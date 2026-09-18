@@ -1,28 +1,32 @@
 import { defineEvent, validateEventRegistry, type EventTheme, type InvitationEvent } from './event-schema.ts';
 export { eventStatuses, type EventStatus, type EventTheme, type InvitationEvent } from './event-schema.ts';
 
+const correspondenceColors: EventTheme['colors'] = {
+  paper: '#F7F2E8',
+  paperDeep: '#D2C2A6',
+  ink: '#285D5B',
+  inkSoft: '#6F8E87',
+  accent: '#8C6A4A',
+  action: '#285D5B',
+  panel: '#D2C2A6',
+  panelDeep: '#6F8E87',
+  light: '#F7F2E8',
+  surround: '#D2C2A6',
+};
+
+const correspondenceFonts: EventTheme['fonts'] = {
+  display: 'Sunflora, Georgia, serif',
+  body: "'Serious Sans', 'Avenir Next', Arial, sans-serif",
+  label: "'Serious Sans', 'Avenir Next', Arial, sans-serif",
+};
+
 const graduationTheme: EventTheme = {
   name: 'theme-graduation',
   decorativeClasses: ['paper-grain', 'retro-postcard'],
   buttonStyle: 'postcard',
   backgroundTreatment: 'paper-grain',
-  colors: {
-    paper: '#f4e9d2',
-    paperDeep: '#dfd1b5',
-    ink: '#274c5a',
-    inkSoft: '#264d59',
-    accent: '#c5644e',
-    action: '#df6841',
-    panel: '#5e7948',
-    panelDeep: '#456c3e',
-    light: '#fffaf0',
-    surround: '#d9c8aa',
-  },
-  fonts: {
-    display: "'Brush Script MT', 'Segoe Script', 'Snell Roundhand', cursive",
-    body: "'Avenir Next', Avenir, 'Century Gothic', sans-serif",
-    label: "'Arial Narrow', 'Avenir Next Condensed', Impact, sans-serif",
-  },
+  colors: correspondenceColors,
+  fonts: correspondenceFonts,
 };
 
 const birthdayTheme: EventTheme = {
@@ -30,23 +34,8 @@ const birthdayTheme: EventTheme = {
   decorativeClasses: ['birthday-one', 'oktoberfest'],
   buttonStyle: 'ticket',
   backgroundTreatment: 'paper-grain',
-  colors: {
-    paper: '#fbf1d4',
-    paperDeep: '#ead9ad',
-    ink: '#0f648b',
-    inkSoft: '#244f5f',
-    accent: '#e7ae20',
-    action: '#0f6b94',
-    panel: '#176f96',
-    panelDeep: '#0f5879',
-    light: '#fff9e8',
-    surround: '#d5c295',
-  },
-  fonts: {
-    display: "'Alfa Slab One', Rockwell, serif",
-    body: "Lora, Georgia, serif",
-    label: "Lora, Georgia, serif",
-  },
+  colors: correspondenceColors,
+  fonts: correspondenceFonts,
 };
 
 const frankieBirthdayTheme: EventTheme = {
@@ -54,23 +43,8 @@ const frankieBirthdayTheme: EventTheme = {
   decorativeClasses: ['birthday-three', 'placeholder-artwork'],
   buttonStyle: 'pill',
   backgroundTreatment: 'plain',
-  colors: {
-    paper: '#f7efe5',
-    paperDeep: '#e7d6c4',
-    ink: '#344b63',
-    inkSoft: '#52667a',
-    accent: '#c86772',
-    action: '#b75361',
-    panel: '#76917b',
-    panelDeep: '#526c59',
-    light: '#fffaf4',
-    surround: '#d9cbbc',
-  },
-  fonts: {
-    display: "Georgia, 'Times New Roman', serif",
-    body: "'Avenir Next', Avenir, sans-serif",
-    label: "'Avenir Next', Avenir, sans-serif",
-  },
+  colors: correspondenceColors,
+  fonts: correspondenceFonts,
 };
 
 export const events: InvitationEvent[] = [

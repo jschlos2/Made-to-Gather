@@ -2,9 +2,9 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import HostShell from '../../../../components/HostShell.astro';
-import EventLifecycleEditor from '../../../../components/EventLifecycleEditor.astro';
+import HostPhotos from '../../../../components/HostPhotos.astro';
 import { events, type InvitationEvent } from '../../../../data/events';
 export const getStaticPaths = (() => events.map(event => ({ params:{slug:event.slug}, props:{event} }))) satisfies GetStaticPaths;
 const { event } = Astro.props as { event: InvitationEvent };
 ---
-<BaseLayout title={`Settings · ${event.title}`} description="Private event settings" robots="noindex, nofollow, noarchive" themeClass="host-page"><HostShell event={event} active="settings" sectionNumber="5" sectionLabel="Event Settings"><EventLifecycleEditor event={event}/></HostShell></BaseLayout>
+<BaseLayout title={`Photos · ${event.title}`} description="Private photo moderation" robots="noindex, nofollow, noarchive" themeClass="host-page"><HostShell event={event} active="photos" sectionNumber="4" sectionLabel="Photos"><HostPhotos event={event}/></HostShell></BaseLayout>

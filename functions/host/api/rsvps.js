@@ -122,14 +122,15 @@ export async function onRequest(context) {
         COALESCE(SUM(CASE WHEN attendance_status = 'declines' THEN 1 ELSE 0 END), 0) AS declines,
         COALESCE(SUM(CASE WHEN attendance_status = 'attending' THEN adults ELSE 0 END), 0) AS adults,
         COALESCE(SUM(CASE WHEN attendance_status = 'attending' THEN children ELSE 0 END), 0) AS children,
-        COALESCE(SUM(CASE WHEN attendance_status = 'attending' THEN adults + children ELSE 0 END), 0) AS attendees
+        COALESCE(SUM(CASE WHEN attendance_status = 'attending' THEN adults + children ELSE 0 END), 0) AS attendees,
+        COALESCE(SUM(CASE WHEN TRIM(COALESCE(dietary_restrictions, '')) <> '' THEN 1 ELSE 0 END), 0) AS dietaryNotes
       FROM rsvps
       ${summaryWhere}
     `).bind(...summaryValues).first();
 
     return json({
       ok: true,
-      summary: summary ?? { attending: 0, declines: 0, adults: 0, children: 0, attendees: 0 },
+      summary: summary ?? { attending: 0, declines: 0, adults: 0, children: 0, attendees: 0, dietaryNotes: 0 },
       rsvps,
       truncated: rsvps.length === limit,
     });

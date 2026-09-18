@@ -1,0 +1,47 @@
+---
+import type { InvitationEvent } from '../data/events';
+import '../styles/host.css';
+
+interface Props {
+  event?: InvitationEvent;
+  active?: 'overview' | 'guests' | 'photos' | 'settings';
+  sectionNumber?: string;
+  sectionLabel?: string;
+}
+
+const { event, active, sectionNumber, sectionLabel } = Astro.props;
+const eventDate = event ? `${event.date.weekday}, ${event.date.monthDay}, ${event.date.year}` : '';
+const tabs = event ? [
+  { id: 'overview', label: 'Overview', href: `/host/events/${event.slug}/` },
+  { id: 'guests', label: 'Guests', href: `/host/events/${event.slug}/guests/` },
+  { id: 'photos', label: 'Photos', href: `/host/events/${event.slug}/photos/` },
+  { id: 'settings', label: 'Event Settings', href: `/host/events/${event.slug}/edit/` },
+] : [];
+---
+
+<main class="host-ui">
+  {event ? (
+    <header class="host-event-header">
+      <div class="host-event-heading">
+        <p class="host-page-id">{sectionNumber} — {sectionLabel}</p>
+        <h1>{event.title}</h1>
+        <p class="host-event-date">{eventDate}</p>
+      </div>
+      <nav class="host-tabs" aria-label={`${event.title} dashboard sections`}>
+        {tabs.map((tab) => <a href={tab.href} aria-current={active === tab.id ? 'page' : undefined}>{tab.label}</a>)}
+      </nav>
+    </header>
+  ) : (
+    <header class="host-brand-header">
+      <div>
+        <h1>Made to Gather</h1>
+        <p>Host Dashboard&nbsp; · &nbsp;Private View</p>
+      </div>
+      <div class="host-brand-actions">
+        <span>America / Los Angeles</span>
+        <a class="host-button host-button--outline" href="/host/api/rsvps?event=all&attendance=all&sort=newest&format=csv">Export CSV</a>
+      </div>
+    </header>
+  )}
+  <slot />
+</main>

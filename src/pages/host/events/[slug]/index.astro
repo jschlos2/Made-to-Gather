@@ -1,0 +1,41 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import HostShell from '../../../../components/HostShell.astro';
+import { events, type InvitationEvent } from '../../../../data/events';
+export const getStaticPaths = (() => events.map(event => ({ params:{slug:event.slug}, props:{event} }))) satisfies GetStaticPaths;
+const { event } = Astro.props as { event: InvitationEvent };
+---
+<BaseLayout title={`${event.title} · Host overview`} description="Private event overview" robots="noindex, nofollow, noarchive" themeClass="host-page">
+  <HostShell event={event} active="overview" sectionNumber="2" sectionLabel="Event Overview">
+    <section class="event-overview" data-event-overview data-event={event.slug}>
+      <div class="event-overview-main">
+        <div class="event-intro">
+          <img src={event.artwork.src} alt={event.artwork.alt} width={event.artwork.width} height={event.artwork.height} />
+          <div>
+            <span class="host-status-badge" data-event-status>Loading</span>
+            <p data-status-description>Loading current event status…</p>
+            <div class="event-intro-actions"><a class="host-button" href={event.lifecycle.status === 'draft' ? `/host/events/${event.slug}/preview/` : `/events/${event.slug}/`}>View invitation</a><a class="host-button host-button--outline" href={`/host/events/${event.slug}/guests/`}>Guest list</a></div>
+          </div>
+        </div>
+        <div class="overview-totals">
+          <p class="host-eyebrow">RSVP totals</p>
+          <dl><div><dd data-total="adults">—</dd><dt>Adults</dt></div><div><dd data-total="children">—</dd><dt>Children</dt></div><div><dd data-total="declines">—</dd><dt>Unable</dt></div><div class="overview-total--attention"><dd data-total="pendingPhotos">—</dd><dt>Pending photos</dt></div></dl>
+          <p class="host-meta"><span data-total="rsvps">—</span> RSVPs · <span data-total="attendees">—</span> attendees</p>
+        </div>
+      </div>
+      <aside class="event-overview-aside">
+        <section class="attention-panel"><p class="host-eyebrow">Needs attention</p><h2>Notes from guests</h2><div data-dietary-list><p>Loading dietary notes…</p></div><a href={`/host/events/${event.slug}/guests/?filter=dietary`}>See all dietary restrictions</a></section>
+        <section class="photo-queue"><p class="host-eyebrow">Photo queue</p><p><strong data-photo-queue>—</strong> guest uploads are waiting for your approval before they appear on the event page.</p><a class="host-button host-button--outline" href={`/host/events/${event.slug}/photos/`}>Open moderation</a></section>
+      </aside>
+    </section>
+  </HostShell>
+</BaseLayout>
+<script>
+  const root=document.querySelector<HTMLElement>('[data-event-overview]');const slug=root?.dataset.event||'';const totals=new Map(Array.from(document.querySelectorAll<HTMLElement>('[data-total]')).map(el=>[el.dataset.total,el]));const set=(name:string,value:unknown)=>{const target=totals.get(name);if(target)target.textContent=String(value??0)};
+  const statusCopy:Record<string,string>={draft:'This invitation is still a private draft. Review the artwork and details before opening RSVPs.',rsvp_open:'Invitations are live and responses are coming in. Review guest notes and the photo queue as needed.',rsvp_closed:'RSVPs are closed. Invitation details remain available to guests with the link.',event_day:'Today’s event details are prioritized for guests. Check messages and photo uploads here.',photos_open:'Guest photo uploads are open while new RSVPs remain closed.',archived:'This gathering is preserved as a family keepsake.'};
+  async function load(){const [eventResponse,rsvpResponse]=await Promise.all([fetch(`/host/api/events?event=${slug}`),fetch(`/host/api/rsvps?event=${slug}&attendance=all&sort=newest`)]);const eventData=await eventResponse.json();const rsvpData=await rsvpResponse.json();if(!eventResponse.ok||!eventData.events?.[0]||!rsvpResponse.ok||!rsvpData.ok)return;const current=eventData.events[0];const badge=document.querySelector<HTMLElement>('[data-event-status]');if(badge){badge.textContent=current.status.replaceAll('_',' ');badge.classList.toggle('host-status-badge--open',current.status==='rsvp_open')}const description=document.querySelector<HTMLElement>('[data-status-description]');if(description)description.textContent=statusCopy[current.status]||'';set('adults',rsvpData.summary.adults);set('children',rsvpData.summary.children);set('declines',rsvpData.summary.declines);set('attendees',rsvpData.summary.attendees);set('rsvps',Number(rsvpData.summary.attending||0)+Number(rsvpData.summary.declines||0));set('pendingPhotos',current.pendingPhotoCount);const queue=document.querySelector<HTMLElement>('[data-photo-queue]');if(queue)queue.textContent=String(current.pendingPhotoCount||0);const notes=document.querySelector<HTMLElement>('[data-dietary-list]');notes?.replaceChildren();const withDietary=(rsvpData.rsvps||[]).filter((rsvp:any)=>String(rsvp.dietary_restrictions||'').trim()).slice(0,3);if(!withDietary.length){const p=document.createElement('p');p.textContent='No dietary notes need attention.';notes?.append(p)}else for(const rsvp of withDietary){const article=document.createElement('article');const h=document.createElement('h3');h.textContent=rsvp.guest_name;const p=document.createElement('p');p.textContent=rsvp.dietary_restrictions;article.append(h,p);notes?.append(article)}}void load();
+</script>
+<style>
+  .event-overview{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(18rem,.85fr);gap:3.25rem;padding-top:2.75rem}.event-intro{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:1.75rem;align-items:start}.event-intro img{width:14rem;height:20rem;border:1px solid var(--host-rule);object-fit:cover}.event-intro p{font-size:1.15rem;line-height:1.65}.event-intro-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.25rem}.overview-totals{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--host-ink)}.overview-totals dl{display:grid;grid-template-columns:repeat(4,1fr);margin:1rem 0}.overview-totals dl>div{padding-right:1rem;border-right:1px solid var(--host-rule-soft)}.overview-totals dl>div+div{padding-left:1rem}.overview-totals dl>div:last-child{border-right:0}.overview-totals dd{margin:0;font:700 3rem/.9 var(--host-numeric)}.overview-totals dt{margin-top:.5rem;font-size:.67rem;letter-spacing:.15em;text-transform:uppercase}.overview-total--attention dd{color:var(--host-gold)}.attention-panel{padding:1.5rem;border-top:5px solid var(--host-gold);background:rgba(255,255,255,.4)}.attention-panel h2{margin:.8rem 0;color:var(--host-gold);font:400 2rem/1 var(--host-display)}.attention-panel article{padding:.75rem 0;border-top:1px solid var(--host-rule-soft)}.attention-panel article h3,.attention-panel article p{margin:0}.attention-panel article p{margin-top:.25rem;font-style:italic}.attention-panel>a{display:inline-block;margin-top:1rem;color:var(--host-gold);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase}.photo-queue{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--host-ink)}.photo-queue p:not(.host-eyebrow){font-size:1.05rem;line-height:1.5}.photo-queue strong{font-family:var(--host-numeric);font-size:1.7rem}@media(max-width:55rem){.event-overview{grid-template-columns:1fr}.event-intro{grid-template-columns:10rem 1fr}.event-intro img{width:10rem;height:14rem}}@media(max-width:36rem){.event-intro{grid-template-columns:1fr}.event-intro img{width:100%;height:auto;max-height:24rem}.overview-totals dl{grid-template-columns:repeat(2,1fr);gap:1rem}.overview-totals dl>div:nth-child(2){border-right:0}}
+</style>
