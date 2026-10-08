@@ -1,11 +1,160 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SampleGatheringCard from '../components/SampleGatheringCard.astro';
+
+const samples = [
+  { title: 'Birthtoberfest', description: 'A cheerful birthday concept with bold type and playful festival details.', note: 'A warm, celebratory identity pairing illustrated motifs with a simple guest response flow.', variant: 'birthday' as const },
+  { title: 'Graduation Celebration', description: 'A bright milestone concept balancing original artwork with practical details.', note: 'A keepsake-minded event page designed to make time, place and guest responses effortless to find.', variant: 'graduation' as const },
+];
+
+const inclusions = [
+  ['Custom event identity', 'Original artwork, typography and visual themes designed around each gathering.'],
+  ['Simple RSVP flow', 'A clear, low-friction way for guests to respond without unnecessary steps.'],
+  ['Private sharing', 'Live invitations are shared directly by link instead of being publicly browsable.'],
+  ['Keepsake feel', 'Digital invitations designed to feel thoughtful, memorable and worth revisiting.'],
+];
 ---
 
-<BaseLayout title="Made to Gather" description="Private family gatherings, thoughtfully remembered." robots="noindex, nofollow, noarchive">
-  <main class="event-index">
-    <p class="section-kicker">Made to Gather</p>
-    <h1>Family moments, gathered with care.</h1>
-    <p>Invitations are shared privately by direct link.</p>
+<BaseLayout
+  title="Made to Gather — Private invitations, designed with care"
+  description="Made to Gather is a customizable digital invitation platform for meaningful gatherings, with original event identities and simple RSVP flows."
+  themeColor="#F7F2E8"
+  themeClass="public-home"
+>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header" aria-label="Made to Gather">
+    <a class="site-wordmark" href="/" aria-label="Made to Gather home">Made to Gather</a>
+    <a href="#about">About the project</a>
+  </header>
+
+  <main id="main-content">
+    <section class="home-hero" aria-labelledby="home-title">
+      <div class="home-hero__ornament" aria-hidden="true"><span>❧</span></div>
+      <p class="home-eyebrow">Made to Gather</p>
+      <h1 id="home-title">Private invitations,<br />designed with care.</h1>
+      <p class="home-hero__body">Made to Gather is a customizable digital invitation platform for meaningful gatherings, with custom event pages, thoughtful details and simple RSVP flows.</p>
+      <div class="home-actions">
+        <a class="home-button" href="#samples">View a sample invitation</a>
+        <a class="home-button home-button--text" href="#about">About the project</a>
+      </div>
+    </section>
+
+    <section class="home-section home-section--includes" aria-labelledby="includes-title">
+      <div class="home-section__heading">
+        <p class="home-eyebrow">What it includes</p>
+        <h2 id="includes-title">Thoughtful by design,<br />simple by nature.</h2>
+      </div>
+      <div class="inclusion-grid">
+        {inclusions.map(([title, description], index) => (
+          <article>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <h3>{title}</h3>
+            <p>{description}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="home-section home-section--samples" id="samples" aria-labelledby="samples-title">
+      <div class="home-section__heading home-section__heading--row">
+        <div>
+          <p class="home-eyebrow">Selected concepts</p>
+          <h2 id="samples-title">Sample gatherings</h2>
+        </div>
+        <p>Sanitized design studies created for public viewing. Real invitations remain private.</p>
+      </div>
+      <div class="sample-grid">
+        {samples.map((sample) => <SampleGatheringCard {...sample} />)}
+      </div>
+    </section>
+
+    <section class="home-section home-section--about" id="about" aria-labelledby="about-title">
+      <div class="about-ornament" aria-hidden="true">❧</div>
+      <p class="home-eyebrow">Why I built it</p>
+      <h2 id="about-title">A personal alternative to the template.</h2>
+      <p>I wanted a more personal way to design and share invitations without forcing custom artwork into generic templates. Made to Gather grew from that need, combining illustration, branding and web design into a reusable invitation system.</p>
+    </section>
+
+    <aside class="privacy-note" aria-labelledby="privacy-title">
+      <span class="privacy-note__icon" aria-hidden="true">✉</span>
+      <div>
+        <p class="home-eyebrow" id="privacy-title">A note on privacy</p>
+        <p>Made to Gather is intentionally private. Live invitations are shared directly with guests, while public visitors can explore selected samples and project details.</p>
+      </div>
+    </aside>
   </main>
+
+  <footer class="home-footer">
+    <p><strong>Made to Gather</strong></p>
+    <p>Thoughtful gatherings, shared with care.</p>
+  </footer>
 </BaseLayout>
+
+<style>
+  :global(.public-home) { background-color: var(--color-paper); }
+  :global(body.public-home) { padding: 0; }
+  .skip-link { position: fixed; top: .75rem; left: .75rem; z-index: 10; padding: .65rem .9rem; background: var(--color-ink); color: var(--color-paper); transform: translateY(-200%); }
+  .skip-link:focus { transform: translateY(0); }
+  .site-header { display: flex; width: min(76rem, calc(100% - 2rem)); min-height: 5.5rem; align-items: center; justify-content: space-between; margin: 0 auto; border-bottom: 1px solid var(--color-line); }
+  .site-header > a:last-child { font-size: .68rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+  .site-wordmark { font: 400 clamp(1.75rem, 4vw, 2.4rem)/1 var(--font-display); text-decoration: none; }
+  .home-hero { position: relative; display: grid; min-height: min(42rem, calc(100vh - 5.5rem)); width: min(76rem, calc(100% - 2rem)); margin: 0 auto; padding: clamp(4rem, 10vw, 7rem) 0; align-content: center; text-align: center; }
+  .home-hero::before, .home-hero::after { position: absolute; top: 50%; width: min(15vw, 11rem); height: 1px; background: var(--color-line); content: ''; }
+  .home-hero::before { left: 0; }
+  .home-hero::after { right: 0; }
+  .home-hero__ornament { display: flex; width: min(14rem, 58vw); align-items: center; gap: .75rem; margin: 0 auto 1.35rem; color: var(--color-ink-soft); }
+  .home-hero__ornament::before, .home-hero__ornament::after { height: 1px; flex: 1; background: currentColor; content: ''; }
+  .home-eyebrow { margin: 0 0 1rem; color: var(--color-ink-soft); font-size: .67rem; font-weight: 700; letter-spacing: .26em; text-transform: uppercase; }
+  .home-hero h1 { max-width: 54rem; margin: 0 auto 1.35rem; font-size: clamp(3.5rem, 10vw, 7rem); line-height: .9; text-wrap: balance; }
+  .home-hero__body { max-width: 42rem; margin: 0 auto 1.6rem; font-size: clamp(1.05rem, 2vw, 1.25rem); line-height: 1.65; }
+  .home-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem 1.5rem; }
+  .home-button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; padding: .8rem 1.15rem; border: 1px solid var(--color-ink); background: var(--color-ink); color: var(--color-paper); font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-decoration: none; text-transform: uppercase; transition: background-color 150ms ease, transform 150ms ease; }
+  .home-button:hover { background: var(--color-ink-soft); transform: translateY(-1px); }
+  .home-button--text { background: transparent; color: var(--color-ink); }
+  .home-button--text:hover { background: color-mix(in srgb, var(--color-paper-deep), transparent 55%); }
+  .home-section { padding: clamp(3.4rem, 8vw, 6rem) max(1rem, calc((100% - 76rem) / 2)); }
+  .home-section__heading { margin-bottom: 2.1rem; }
+  .home-section h2 { margin: 0; color: var(--color-ink); font: 400 clamp(2.7rem, 6vw, 4.6rem)/.95 var(--font-display); text-wrap: balance; }
+  .home-section--includes { border-block: 1px solid var(--color-line); background: color-mix(in srgb, var(--color-paper-deep), var(--color-paper) 56%); }
+  .inclusion-grid { display: grid; border-top: 1px solid var(--color-line); }
+  .inclusion-grid article { position: relative; padding: 1.75rem 0; border-bottom: 1px solid var(--color-line); }
+  .inclusion-grid article > span { color: var(--color-coral); font: 700 .8rem/1 var(--font-numeric); }
+  .inclusion-grid h3 { margin: .75rem 0 .5rem; color: var(--color-ink); font: 400 1.8rem/1 var(--font-display); }
+  .inclusion-grid p { max-width: 29rem; margin: 0; }
+  .home-section__heading--row > p { max-width: 25rem; margin: 1rem 0 0; }
+  .sample-grid { display: grid; gap: clamp(1.25rem, 3vw, 2.25rem); }
+  .home-section--about { position: relative; max-width: 58rem; margin: 0 auto; text-align: center; }
+  .home-section--about > p:last-child { max-width: 44rem; margin: 1.25rem auto 0; font-size: clamp(1.1rem, 2.4vw, 1.35rem); line-height: 1.7; }
+  .about-ornament { margin-bottom: 1.2rem; color: var(--color-coral); font-size: 1.2rem; }
+  .privacy-note { display: grid; width: min(76rem, calc(100% - 2rem)); margin: 0 auto clamp(3rem, 6vw, 4.75rem); padding: clamp(1.5rem, 4vw, 2rem); border: 1px solid var(--color-line); background: color-mix(in srgb, var(--color-paper-deep), transparent 48%); }
+  .privacy-note__icon { display: grid; width: 2.75rem; height: 2.75rem; margin-bottom: 1rem; place-items: center; border: 1px solid var(--color-ink-soft); border-radius: 50%; color: var(--color-coral); font-size: 1rem; }
+  .privacy-note p { margin: 0; }
+  .privacy-note .home-eyebrow { margin-bottom: .6rem; }
+  .home-footer { display: flex; width: min(76rem, calc(100% - 2rem)); align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0 auto; padding: 2rem 0 3rem; border-top: 1px solid var(--color-line); text-align: left; }
+  .home-footer p { margin: 0; }
+  .home-footer strong { color: var(--color-ink); font: 400 1.8rem/1 var(--font-display); }
+
+  @media (min-width: 42rem) {
+    .inclusion-grid { grid-template-columns: repeat(2, 1fr); }
+    .inclusion-grid article { padding: 2rem; }
+    .inclusion-grid article:nth-child(odd) { padding-left: 0; border-right: 1px solid var(--color-line); }
+    .home-section__heading--row { display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
+    .home-section__heading--row > p { margin: 0; }
+    .privacy-note { grid-template-columns: auto 1fr; align-items: center; gap: 1.5rem; }
+    .privacy-note__icon { margin: 0; }
+    .privacy-note .home-eyebrow { margin: 0; }
+  }
+
+  @media (min-width: 48rem) { .sample-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  @media (max-width: 35rem) {
+    .site-header { min-height: 4.5rem; }
+    .site-header > a:last-child { display: none; }
+    .home-hero { min-height: 34rem; }
+    .home-hero::before, .home-hero::after { display: none; }
+    .home-actions { align-items: stretch; flex-direction: column; }
+    .home-footer { align-items: flex-start; flex-direction: column; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { .home-button { transition: none; } }
+</style>

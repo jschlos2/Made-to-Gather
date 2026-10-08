@@ -1,0 +1,53 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  note: string;
+  variant: 'birthday' | 'graduation';
+}
+
+const { title, description, note, variant } = Astro.props;
+---
+
+<article class="sample-card">
+  <div class:list={['sample-card__preview', `sample-card__preview--${variant}`]} aria-hidden="true">
+    <span class="sample-card__top-rule"></span>
+    <span class="sample-card__motif">{variant === 'birthday' ? '1' : '✦'}</span>
+    <p>{title}</p>
+    <span class="sample-card__date">A selected sample</span>
+    <span class="sample-card__bottom-rule"></span>
+  </div>
+  <div class="sample-card__copy">
+    <h3>{title}</h3>
+    <p>{description}</p>
+    <details>
+      <summary>View sample</summary>
+      <p>{note}</p>
+    </details>
+  </div>
+</article>
+
+<style>
+  .sample-card { display: grid; border: 1px solid var(--color-line); background: color-mix(in srgb, var(--color-paper), white 12%); }
+  .sample-card__preview { position: relative; display: grid; min-height: 21rem; padding: 2.5rem 1.5rem; overflow: hidden; place-items: center; border-bottom: 1px solid var(--color-line); background: var(--color-paper-deep); text-align: center; }
+  .sample-card__preview::before { position: absolute; inset: .65rem; border: 1px solid currentColor; content: ''; opacity: .48; }
+  .sample-card__preview p { position: relative; z-index: 1; max-width: 15rem; margin: .5rem auto; font: 400 clamp(2.45rem, 5vw, 3.65rem)/.9 var(--font-display); }
+  .sample-card__motif { position: relative; z-index: 1; display: grid; width: 5rem; height: 5rem; place-items: center; border: 1px solid currentColor; border-radius: 50%; font: 700 2.25rem/1 var(--font-numeric); }
+  .sample-card__date { position: relative; z-index: 1; font-size: .62rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+  .sample-card__top-rule, .sample-card__bottom-rule { position: absolute; right: 1.35rem; left: 1.35rem; height: 5px; border-block: 1px solid currentColor; }
+  .sample-card__top-rule { top: 1.35rem; }
+  .sample-card__bottom-rule { bottom: 1.35rem; }
+  .sample-card__preview--birthday { background: #e5dac4; }
+  .sample-card__preview--birthday::after { position: absolute; inset: 4rem 0 auto; height: 1rem; background: repeating-linear-gradient(90deg, transparent 0 8px, var(--color-ink) 8px 18px, transparent 18px 26px); content: ''; opacity: .18; transform: skewY(-2deg); }
+  .sample-card__preview--graduation { background: color-mix(in srgb, var(--color-ink-soft), var(--color-paper) 58%); }
+  .sample-card__preview--graduation .sample-card__motif { border-radius: 2px; transform: rotate(45deg); }
+  .sample-card__preview--graduation .sample-card__motif { font-size: 1.8rem; }
+  .sample-card__copy { padding: 1.35rem; }
+  .sample-card h3 { margin-bottom: .45rem; color: var(--color-ink); font: 400 clamp(2.15rem, 4vw, 2.65rem)/.95 var(--font-display); }
+  .sample-card__copy > p { min-height: 3rem; margin-bottom: 1.1rem; }
+  .sample-card details { border-top: 1px solid color-mix(in srgb, var(--color-ink-soft), transparent 42%); }
+  .sample-card summary { min-height: 44px; padding: .8rem 0; font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+  .sample-card details p { margin: 0; padding: 0 0 .8rem; color: color-mix(in srgb, var(--color-ink), black 8%); font-size: .88rem; }
+
+  @media (min-width: 70rem) { .sample-card__preview { min-height: 25rem; } }
+</style>
