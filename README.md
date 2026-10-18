@@ -295,14 +295,14 @@ Uploads accept JPEG, PNG, and WebP only, with a maximum of 8 MB per photo and 5 
 
 1. Create a private R2 bucket named `made-to-gather-photos`. Do not enable a public development URL or custom public domain.
 2. In **Workers & Pages → made-to-gather → Settings → Bindings**, add an R2 binding with variable name `PHOTOS` and select that bucket. Add it separately to Preview only if previews should process photos.
-3. Generate a unique high-entropy upload token locally, for example `openssl rand -hex 32`. In **Settings → Variables and Secrets**, add it as an encrypted secret named `PHOTO_UPLOAD_TOKEN_GRADUATION`. Never commit or paste its value into client code.
+3. Generate a unique high-entropy upload token for each event, for example `openssl rand -hex 32`. In **Settings → Variables and Secrets**, add it as an encrypted secret using the event’s `uploadTokenEnv` value. Current names include `PHOTO_UPLOAD_TOKEN_GRADUATION` and `PHOTO_UPLOAD_TOKEN_THEO_FIRST_BIRTHDAY`. Never commit or paste token values into client code.
 4. Review `migrations/0003_create_event_photos.sql`, then apply pending migrations only when ready:
 
 ```sh
 npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote --config wrangler.local.jsonc
 ```
 
-This remote command was not run by Codex. The migration is additive and preserves RSVP rows. Share the private link as `/events/graduation/photos/upload/#token=YOUR_TOKEN`. A URL fragment is not sent in the HTTP request; the page moves it into session storage and removes it from the visible URL. Guests should still avoid forwarding the link. Rotate the encrypted secret if the link is exposed. Existing open sessions retain the old token until their tab/session ends.
+This remote command was not run by Codex. The migration is additive and preserves RSVP rows. Share a private link such as `/events/graduation/photos/upload/#token=YOUR_TOKEN` or `/events/theo-first-birthday/photos/upload/#token=YOUR_TOKEN`, using that event’s matching secret. A URL fragment is not sent in the HTTP request; the page moves it into session storage and removes it from the visible URL. Guests should still avoid forwarding the link. Rotate the encrypted secret if the link is exposed. Existing open sessions retain the old token until their tab/session ends.
 
 The authenticated `/host/` dashboard includes photo filters, previews, individual approve/remove/restore actions, bulk approval for up to 50 selected pending photos, and an explicitly confirmed permanent-delete action. Removal hides an image but retains its R2 object and metadata; permanent deletion removes both and cannot be undone. Only approved images appear publicly, and the invitation reveals “View event photos” only after at least one approval.
 

@@ -205,8 +205,8 @@ export const events: InvitationEvent[] = [
     },
 
     photos: {
-      uploadsEnabled: false,
-      galleryEnabled: false,
+      uploadsEnabled: true,
+      galleryEnabled: true,
       uploadTokenEnv: 'PHOTO_UPLOAD_TOKEN_THEO_FIRST_BIRTHDAY',
     },
 

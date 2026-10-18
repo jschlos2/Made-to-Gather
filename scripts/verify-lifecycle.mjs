@@ -17,6 +17,9 @@ assert.equal(draftEvent.photos.galleryEnabled, false);
 assert.match(draftEvent.date.monthDay, /TBD/);
 assert.match(draftEvent.time, /TBD/);
 assert.ok(theo.theme.buttonStyle && theo.theme.backgroundTreatment, 'Theo’s event must provide reusable theme treatments.');
+assert.equal(theo.photos.uploadsEnabled, true, 'Birthtoberfest must allow the host to open guest photo uploads.');
+assert.equal(theo.photos.galleryEnabled, true, 'Birthtoberfest must support its moderated guest gallery.');
+assert.equal(theo.lifecycle.photoUploadsOpen, false, 'Birthtoberfest uploads must remain closed until the host opens them intentionally.');
 const expected = {
   draft: { rsvpOpen: false, photoUploadsOpen: false, galleryEnabled: false },
   rsvp_open: { rsvpOpen: true, photoUploadsOpen: false, galleryEnabled: true },
