@@ -266,6 +266,8 @@ On the authenticated `/host/` dashboard, each response initially shows only `(**
 
 **Copy message** is the fallback for devices that do not preserve the prefilled `sms:` body. It uses the secure browser Clipboard API and announces success or failure visibly. `sms:` behavior varies: some desktop devices have no SMS application, and Android/iOS versions differ in whether they accept or retain a prefilled message. If the draft body is absent, copy the prepared message and paste it into the messaging app.
 
+Events may also define a host-only post-event template in `hostMessages.postEventPhotoRequest`. For an attending guest, the authenticated dashboard shows **Text thank-you** and **Copy thank-you**. The server personalizes the guest’s first name and inserts that event’s private photo-upload link from its encrypted Cloudflare environment binding. The link is never placed in public event HTML, CSV exports, or client-side event configuration. These controls still open or copy one message at a time; they never send automatically or create a group conversation. If the upload-token secret is missing, the post-event controls are omitted.
+
 To test without contacting a real guest:
 
 1. Use a clearly labeled test number such as `(503) 555-1234` only in local D1.

@@ -6,6 +6,7 @@ export interface EventDetail { label: string; text: string }
 export interface EventLink { label: string; href: string }
 export interface EventArtwork { src: string; alt: string; width: number; height: number }
 export interface EventAudio { src: string; title: string; autoplay?: boolean; loop?: boolean }
+export interface EventHostMessages { postEventPhotoRequest?: string }
 export interface EventTheme {
   name: string;
   decorativeClasses?: string[];
@@ -45,6 +46,7 @@ export interface InvitationEvent {
   links?: EventLink[];
   rsvpDeadline: string;
   hosts: string;
+  hostMessages?: EventHostMessages;
   rsvp: EventRsvp;
   lifecycle: { status:EventStatus; rsvpOpen:boolean; photoUploadsOpen:boolean; archiveSummary?:string };
   photos: { uploadsEnabled:boolean; galleryEnabled:boolean; uploadTokenEnv:string };
@@ -84,6 +86,10 @@ export function validateEvent(event: InvitationEvent): string[] {
   if (!event.description.length || event.description.some((item) => !item.trim())) errors.push('description must contain at least one non-empty paragraph.');
   if (!event.details.length || event.details.some((item) => !item.label.trim() || !item.text.trim())) errors.push('details must contain labeled, non-empty sections.');
   if (event.links?.some((link) => !link.label.trim() || !/^https:\/\//.test(link.href))) errors.push('links must include a label and an HTTPS URL.');
+  if (event.hostMessages?.postEventPhotoRequest) {
+    const template = event.hostMessages.postEventPhotoRequest;
+    if (!template.includes('{firstName}') || !template.includes('{uploadUrl}')) errors.push('hostMessages.postEventPhotoRequest must include {firstName} and {uploadUrl}.');
+  }
   if ((event.calendar.start && !event.calendar.end) || (!event.calendar.start && event.calendar.end)) errors.push('calendar.start and calendar.end must be provided together.');
   try { new Intl.DateTimeFormat('en-US', { timeZone:event.calendar.timeZone }).format(); } catch { errors.push('calendar.timeZone must be a valid IANA timezone.'); }
   if (event.lifecycle.status === 'draft' && event.lifecycle.rsvpOpen) errors.push('Draft events cannot have RSVPs open.');

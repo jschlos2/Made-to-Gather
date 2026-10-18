@@ -1,5 +1,5 @@
 import { onRequest as submitRsvp } from '../functions/api/rsvp.js';
-import { createHostMessage, createSmsUri } from '../functions/lib/host-message.js';
+import { createHostMessage, createPostEventMessage, createSmsUri } from '../functions/lib/host-message.js';
 import { maskUsMobileNumber, normalizeUsMobileNumber } from '../functions/lib/phone.js';
 import { copyMessage } from '../src/scripts/copy-message.js';
 
@@ -19,6 +19,11 @@ const attending = createHostMessage({ event_slug: 'graduation', guest_name: 'Tay
 const declining = createHostMessage({ event_slug: 'theo-first-birthday', guest_name: 'Morgan Guest', attendance_status: 'declines' });
 assert(attending?.includes('Hi Taylor!') && attending.includes('attending') && attending.includes('can’t wait'), 'Attending message failed.');
 assert(declining?.includes('Hi Morgan!') && declining.includes('unable to attend') && !declining.includes('can’t wait'), 'Decline message failed.');
+const uploadUrl = 'https://example.com/events/theo-first-birthday/photos/upload/#token=test-token';
+const postEvent = createPostEventMessage({ event_slug: 'theo-first-birthday', guest_name: 'Taylor Guest', attendance_status: 'attending' }, uploadUrl);
+const declinedPostEvent = createPostEventMessage({ event_slug: 'theo-first-birthday', guest_name: 'Morgan Guest', attendance_status: 'declines' }, uploadUrl);
+assert(postEvent?.includes('Hi Taylor!') && postEvent.includes(uploadUrl) && postEvent.includes('Theo’s first birthday'), 'Post-event message failed.');
+assert(declinedPostEvent === null, 'A declining guest received a post-event message.');
 const smsUri = createSmsUri('+15035551234', attending);
 assert(smsUri.startsWith('sms:+15035551234?&body='), 'SMS URI recipient was not safely normalized.');
 assert(decodeURIComponent(smsUri.split('body=')[1]) === attending, 'SMS message did not round-trip.');

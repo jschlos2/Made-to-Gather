@@ -16,3 +16,12 @@ export function createHostMessage(rsvp) {
 export function createSmsUri(mobileNumber, message) {
   return `sms:${mobileNumber}?&body=${encodeURIComponent(message)}`;
 }
+
+export function createPostEventMessage(rsvp, uploadUrl) {
+  const event = getEventBySlug(rsvp.event_slug);
+  const template = event?.hostMessages?.postEventPhotoRequest;
+  if (rsvp.attendance_status !== 'attending' || !template || !uploadUrl) return null;
+  return template
+    .replaceAll('{firstName}', firstName(rsvp.guest_name))
+    .replaceAll('{uploadUrl}', uploadUrl);
+}

@@ -1,5 +1,5 @@
 import { getEventBySlug } from '../../../src/data/events.ts';
-import { createHostMessage, createSmsUri } from '../../lib/host-message.js';
+import { createHostMessage, createPostEventMessage, createSmsUri } from '../../lib/host-message.js';
 import { maskUsMobileNumber } from '../../lib/phone.js';
 
 const ATTENDANCE_FILTERS = new Set(['all', 'attending', 'declines']);
@@ -101,11 +101,19 @@ export async function onRequest(context) {
 
     const rsvps = rowsResult.results.map((row) => {
       const textMessage = row.mobile_number ? createHostMessage(row) : null;
+      const event = getEventBySlug(row.event_slug);
+      const uploadToken = event?.photos.uploadsEnabled ? context.env[event.photos.uploadTokenEnv] : null;
+      const uploadUrl = typeof uploadToken === 'string' && uploadToken.length >= 32
+        ? `${url.origin}/events/${encodeURIComponent(row.event_slug)}/photos/upload/#token=${encodeURIComponent(uploadToken)}`
+        : null;
+      const postEventTextMessage = row.mobile_number && uploadUrl ? createPostEventMessage(row, uploadUrl) : null;
       return {
         ...row,
         masked_mobile_number: maskUsMobileNumber(row.mobile_number),
         text_message: textMessage,
         sms_uri: row.mobile_number && textMessage ? createSmsUri(row.mobile_number, textMessage) : null,
+        post_event_text_message: postEventTextMessage,
+        post_event_sms_uri: row.mobile_number && postEventTextMessage ? createSmsUri(row.mobile_number, postEventTextMessage) : null,
       };
     });
 

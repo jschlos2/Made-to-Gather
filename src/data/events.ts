@@ -196,6 +196,11 @@ export const events: InvitationEvent[] = [
 
     hosts: 'The Robertson’s',
 
+    hostMessages: {
+      postEventPhotoRequest:
+        'Hi {firstName}! Thank you for celebrating Theo’s first birthday with us! If you took any photos, we’d love for you to add them to our private event album: {uploadUrl} Thanks for helping us capture his special day! — The Robertsons',
+    },
+
     lifecycle: {
       status: 'rsvp_open',
       rsvpOpen: true,
