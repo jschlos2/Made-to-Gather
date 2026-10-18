@@ -11,22 +11,45 @@ const { event } = Astro.props as { event: InvitationEvent };
     <header><p class="photo-kicker">Private event album</p><h1>Add your photos</h1><p>Share favorite moments from {event.title}. Every photo is reviewed by the host before it appears in the gallery.</p></header>
     <p class="upload-status" data-upload-status role="status" aria-live="polite">Checking your private upload link…</p>
     <form data-upload-form hidden>
+      <aside class="upload-limits" aria-label="Photo upload limits">
+        <strong>Photo limits</strong>
+        <span>Choose up to 10 photos in each batch.</span>
+        <span>You may upload up to 20 photos total per day.</span>
+        <span>Each photo must be 8 MB or smaller.</span>
+      </aside>
       <label class="file-picker">Choose photos <input type="file" name="photos" multiple accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" required /></label>
-      <p class="field-help">JPEG, PNG, or WebP. Up to 5 photos at once; 8 MB each. HEIC/HEIF is not supported.</p>
+      <p class="field-help">JPEG, PNG, or WebP only. HEIC/HEIF is not supported.</p>
       <div class="photo-previews" data-previews></div>
       <label class="photo-consent"><input type="checkbox" required /> I have permission to share these photos with the event host and guests.</label>
       <button type="submit">Upload photos</button>
     </form>
     <div class="upload-results" data-upload-results aria-live="polite"></div>
+    <section class="upload-confirmation" data-upload-confirmation hidden tabindex="-1">
+      <p class="photo-kicker">Upload complete</p>
+      <h2>Your batch has been received</h2>
+      <p data-confirmation-summary></p>
+      <ul data-confirmation-files></ul>
+      <p>Every successful photo is waiting for host review. You can now return to a fresh upload screen to add different photos.</p>
+      <p class="confirmation-limit"><strong>Reminder:</strong> Uploads are limited to 10 photos per batch and 20 photos total per day.</p>
+      <div class="confirmation-actions">
+        <button type="button" data-upload-another>Upload more photos</button>
+        <a href={`/events/${event.slug}`}>Return to invitation</a>
+      </div>
+    </section>
   </main>
 </BaseLayout>
 <script>
   const page = document.querySelector<HTMLElement>('[data-upload-page]');
   const form = document.querySelector<HTMLFormElement>('[data-upload-form]');
   const input = form?.querySelector<HTMLInputElement>('input[type=file]');
+  const consent = form?.querySelector<HTMLInputElement>('.photo-consent input');
   const status = document.querySelector<HTMLElement>('[data-upload-status]');
   const previews = document.querySelector<HTMLElement>('[data-previews]');
   const results = document.querySelector<HTMLElement>('[data-upload-results]');
+  const confirmation = document.querySelector<HTMLElement>('[data-upload-confirmation]');
+  const confirmationSummary = confirmation?.querySelector<HTMLElement>('[data-confirmation-summary]');
+  const confirmationFiles = confirmation?.querySelector<HTMLElement>('[data-confirmation-files]');
+  const uploadAnother = confirmation?.querySelector<HTMLButtonElement>('[data-upload-another]');
   const eventSlug = page?.dataset.event || '';
   const storageKey = `made-to-gather-photo-token:${eventSlug}`;
   const url = new URL(location.href);
@@ -38,40 +61,47 @@ const { event } = Astro.props as { event: InvitationEvent };
     history.replaceState(null, '', url);
   }
   const token = sessionStorage.getItem(storageKey) || '';
+  let maxFiles = 10;
   let objectUrls: string[] = [];
   const show = (message: string, error = false) => { if (status) { status.textContent = message; status.classList.toggle('upload-status--error', error); } };
   fetch(`/api/photos/upload/${eventSlug}`, { headers: { 'X-Upload-Token': token } }).then(async (response) => {
     const data = await response.json().catch(() => null);
     if (!response.ok) throw new Error(data?.message || 'This private upload link is unavailable.');
+    if (Number.isInteger(data?.limits?.maxFiles) && data.limits.maxFiles > 0) maxFiles = data.limits.maxFiles;
     if (form) form.hidden = false;
     show('Your private upload link is ready.');
   }).catch((error) => show(error instanceof Error ? error.message : 'This private upload link is unavailable.', true));
   input?.addEventListener('change', () => {
     objectUrls.forEach(URL.revokeObjectURL); objectUrls = []; previews?.replaceChildren();
-    const files = Array.from(input.files || []).slice(0, 5);
+    const files = Array.from(input.files || []).slice(0, maxFiles);
     for (const file of files) { const img = document.createElement('img'); img.alt = ''; img.src = URL.createObjectURL(file); objectUrls.push(img.src); previews?.append(img); }
-    if ((input.files?.length || 0) > 5) show('Choose no more than 5 photos at once.', true);
+    if ((input.files?.length || 0) > maxFiles) show(`Choose no more than ${maxFiles} photos at once.`, true);
   });
   form?.addEventListener('submit', async (submitEvent) => {
     submitEvent.preventDefault();
     const files = Array.from(input?.files || []);
-    if (!files.length || files.length > 5) return show('Choose between 1 and 5 photos.', true);
+    if (!files.length || files.length > maxFiles) return show(`Choose between 1 and ${maxFiles} photos.`, true);
     const allowed = new Set(['image/jpeg','image/png','image/webp']);
     const invalid = files.find((file) => !allowed.has(file.type) || file.size > 8 * 1024 * 1024 || !file.size);
     if (invalid) return show(`${invalid.name} must be a JPEG, PNG, or WebP no larger than 8 MB.`, true);
     const button = form.querySelector<HTMLButtonElement>('button[type=submit]'); if (button) button.disabled = true;
     results?.replaceChildren();
-    let saved = 0;
+    let saved = 0; const outcomes: { name:string; uploaded:boolean }[] = [];
     for (let index = 0; index < files.length; index += 1) {
       const file = files[index]; show(`Uploading ${index + 1} of ${files.length}…`);
       const response = await fetch(`/api/photos/upload/${eventSlug}`, { method:'POST', body:file, headers:{ 'Content-Type':file.type, 'X-Upload-Token':token, 'X-Photo-Id':crypto.randomUUID(), 'X-Photo-Filename':encodeURIComponent(file.name) } });
       const data = await response.json().catch(() => null);
       const line = document.createElement('p'); line.textContent = response.ok ? `${file.name}: uploaded for host review.` : `${file.name}: ${data?.message || 'upload failed.'}`; results?.append(line);
-      if (response.ok) saved += 1;
+      outcomes.push({ name:file.name, uploaded:response.ok }); if (response.ok) saved += 1;
     }
     show(saved === files.length ? 'Thanks! Your photos were uploaded for host review.' : `${saved} of ${files.length} photos uploaded.`, saved !== files.length);
+    objectUrls.forEach(URL.revokeObjectURL); objectUrls=[]; previews?.replaceChildren(); if(input)input.value='';
+    confirmationFiles?.replaceChildren(...outcomes.map(({name,uploaded})=>{const item=document.createElement('li');item.textContent=`${uploaded?'Uploaded':'Not uploaded'}: ${name}`;item.classList.toggle('upload-failed',!uploaded);return item}));
+    if(confirmationSummary)confirmationSummary.textContent=saved===files.length?`All ${saved} photo${saved===1?' was':'s were'} uploaded successfully.`:`${saved} of ${files.length} photos uploaded successfully. Files marked “Not uploaded” may be selected again.`;
+    if(form)form.hidden=true; if(results)results.hidden=true; if(confirmation){confirmation.hidden=false;confirmation.focus()}
     if (button) button.disabled = false;
   });
+  uploadAnother?.addEventListener('click',()=>{if(confirmation)confirmation.hidden=true;if(results){results.hidden=false;results.replaceChildren()}form?.reset();objectUrls.forEach(URL.revokeObjectURL);objectUrls=[];previews?.replaceChildren();if(consent)consent.checked=false;if(form)form.hidden=false;show(`Fresh upload ready. Choose up to ${maxFiles} different photos (20 total per day).`);input?.focus();window.scrollTo({top:form?.offsetTop||0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})});
 </script>
 <style>
   .photo-page { width:min(44rem,100%); min-height:100vh; margin:auto; padding:2rem 1.25rem 5rem; }
@@ -80,10 +110,21 @@ const { event } = Astro.props as { event: InvitationEvent };
   .photo-kicker { font-family:var(--font-label); letter-spacing:.12em; text-transform:uppercase; }
   h1 { margin:.3rem 0 1rem; font-family:var(--font-display); font-size:clamp(3rem,14vw,6rem); line-height:.95; text-transform:none; }
   form { display:grid; gap:1rem; padding-top:1rem; border-top:var(--border); }
+  .upload-limits { display:grid; gap:.25rem; padding:1rem; border:1px solid color-mix(in srgb,var(--color-ink),transparent 45%); background:color-mix(in srgb,var(--color-paper-deep),var(--color-white) 72%); }
+  .upload-limits strong { font-family:var(--font-label); letter-spacing:.06em; text-transform:uppercase; }
   .file-picker { display:grid; gap:.5rem; font-weight:700; } input[type=file] { min-height:44px; padding:.6rem; border:var(--border); background:var(--color-white); }
   .photo-previews { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; } .photo-previews img { width:100%; aspect-ratio:1; object-fit:cover; }
   .photo-consent { display:flex; gap:.65rem; align-items:flex-start; } .photo-consent input { width:1.25rem; height:1.25rem; flex:none; }
   button { min-height:48px; border:0; background:var(--color-ink); color:var(--color-white); font:700 1rem var(--font-label); cursor:pointer; text-transform:uppercase; }
   button:disabled { opacity:.55; cursor:wait; } .upload-status--error { color:#8f2f24; font-weight:700; }
+  .upload-confirmation { margin-top:1.5rem; padding:clamp(1.5rem,5vw,2.5rem); border:var(--border); background:color-mix(in srgb,var(--color-paper-deep),var(--color-white) 62%); }
+  .upload-confirmation h2 { margin:.25rem 0 1rem; font-family:var(--font-display); font-size:clamp(2.2rem,9vw,4rem); line-height:1; text-transform:none; }
+  .upload-confirmation ul { margin:1.25rem 0; padding-left:1.25rem; }
+  .upload-confirmation li { margin:.4rem 0; overflow-wrap:anywhere; }
+  .upload-confirmation .upload-failed { color:#8f2f24; font-weight:700; }
+  .confirmation-limit { padding:.8rem 1rem; border-left:3px solid var(--color-ink); background:color-mix(in srgb,var(--color-white),transparent 35%); }
+  .confirmation-actions { display:flex; flex-wrap:wrap; gap:.75rem; margin-top:1.5rem; }
+  .confirmation-actions button,.confirmation-actions a { display:inline-flex; min-height:48px; align-items:center; justify-content:center; padding:.7rem 1rem; border:1px solid var(--color-ink); font:700 .85rem var(--font-label); text-decoration:none; text-transform:uppercase; }
+  .confirmation-actions a { background:transparent; color:var(--color-ink); }
   @media(min-width:48rem){.photo-page{padding:4rem 2rem 7rem}.photo-previews{grid-template-columns:repeat(5,1fr)}}
 </style>

@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { magicMatches, readBoundedBody, safeFilename, tokenIsValid, validPhotoId } from '../functions/lib/photos.js';
+import { MAX_PHOTOS_PER_BATCH, magicMatches, readBoundedBody, safeFilename, tokenIsValid, validPhotoId } from '../functions/lib/photos.js';
 import { onRequest as moderate } from '../functions/host/api/photos/[id].js';
 
 const id = '018f8af0-67e9-4d23-8d2d-8b9c33f24121';
 assert.equal(validPhotoId(id), true);
 assert.equal(validPhotoId('../photo'), false);
 assert.equal(safeFilename(encodeURIComponent('../family photo.jpg')), 'family photo.jpg');
+assert.equal(MAX_PHOTOS_PER_BATCH, 10, 'Guests should be able to select ten photos per batch.');
 assert.equal(magicMatches('image/jpeg', Uint8Array.from([0xff, 0xd8, 0xff, 0])), true);
 assert.equal(magicMatches('image/png', Uint8Array.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a])), true);
 assert.equal(magicMatches('image/webp', Uint8Array.from([...Buffer.from('RIFF'),0,0,0,0,...Buffer.from('WEBP')])), true);

@@ -1,4 +1,4 @@
-import { DAILY_UPLOAD_LIMIT, MAX_PHOTO_BYTES, PHOTO_TYPES, magicMatches, photoBindings, photoEvent, photoJson, readBoundedBody, safeFilename, tokenIsValid, uploadFingerprint, validPhotoId } from '../../../lib/photos.js';
+import { DAILY_UPLOAD_LIMIT, MAX_PHOTO_BYTES, MAX_PHOTOS_PER_BATCH, PHOTO_TYPES, magicMatches, photoBindings, photoEvent, photoJson, readBoundedBody, safeFilename, tokenIsValid, uploadFingerprint, validPhotoId } from '../../../lib/photos.js';
 import { getLifecycle, publicLifecycle } from '../../../lib/lifecycle.js';
 
 export async function onRequest(context) {
@@ -10,7 +10,7 @@ export async function onRequest(context) {
   const token = context.request.headers.get('X-Upload-Token') || '';
   if (!await tokenIsValid(token, context.env[event.photos.uploadTokenEnv])) return photoJson({ ok: false, message: 'This private upload link is invalid or has expired.' }, 403);
   if (!photoBindings(context.env)) return photoJson({ ok: false, message: 'Photo storage is not configured.' }, 503);
-  if (context.request.method === 'GET') return photoJson({ ok: true, event: { slug: event.slug, title: event.title }, limits: { maxBytes: MAX_PHOTO_BYTES, maxFiles: 5 } });
+  if (context.request.method === 'GET') return photoJson({ ok: true, event: { slug: event.slug, title: event.title }, limits: { maxBytes: MAX_PHOTO_BYTES, maxFiles: MAX_PHOTOS_PER_BATCH } });
 
   const type = (context.request.headers.get('Content-Type') || '').split(';')[0].toLowerCase();
   const typeInfo = PHOTO_TYPES.get(type);

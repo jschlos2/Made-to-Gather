@@ -306,6 +306,8 @@ npx wrangler@latest d1 migrations apply made-to-gather-rsvps --remote --config w
 
 This remote command was not run by Codex. The migration is additive and preserves RSVP rows. Share a private link such as `/events/graduation/photos/upload/#token=YOUR_TOKEN` or `/events/theo-first-birthday/photos/upload/#token=YOUR_TOKEN`, using that event’s matching secret. A URL fragment is not sent in the HTTP request; the page moves it into session storage and removes it from the visible URL. Guests should still avoid forwarding the link. Rotate the encrypted secret if the link is exposed. Existing open sessions retain the old token until their tab/session ends.
 
+Guests may select up to 10 supported photos per batch, with an 8 MB limit per image and a 20-photo daily limit per private link and network fingerprint. The page presents these limits in a dedicated notice before selection and repeats the batch and daily limits after upload. Files upload sequentially for mobile reliability. When a batch finishes, the page replaces the form with a confirmation summary and file-by-file results. **Upload more photos** resets the file input, previews, results, and consent checkbox before showing a fresh upload screen, which helps prevent accidental duplicate submissions.
+
 The authenticated `/host/` dashboard includes photo filters, previews, individual approve/remove/restore actions, bulk approval for up to 50 selected pending photos, and an explicitly confirmed permanent-delete action. Removal hides an image but retains its R2 object and metadata; permanent deletion removes both and cannot be undone. Only approved images appear publicly, and the invitation reveals “View event photos” only after at least one approval.
 
 ### Local photo testing

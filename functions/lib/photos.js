@@ -1,7 +1,7 @@
 import { getEventBySlug } from '../../src/data/events.ts';
 
 export const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
-export const MAX_PHOTOS_PER_BATCH = 5;
+export const MAX_PHOTOS_PER_BATCH = 10;
 export const DAILY_UPLOAD_LIMIT = 20;
 export const PHOTO_TYPES = new Map([
   ['image/jpeg', { extension: 'jpg', label: 'JPEG' }],
